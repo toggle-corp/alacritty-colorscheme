@@ -21,24 +21,24 @@ def parse():
 
     optype = parser.add_mutually_exclusive_group(required=True)
 
-    optype.add_argument('-S',
-                        '--show',
+    optype.add_argument('-s',
+                        '--show-applied',
                         dest='show_applied_colorscheme',
                         help='Show applied colorscheme',
                         action='store_const',
                         const=True)
 
     optype.add_argument('-l',
-                        '--list',
-                        dest='show_available_colorschemes',
-                        help='Show available colorschemes',
+                        '--list-available',
+                        dest='list_available_colorschemes',
+                        help='List available colorschemes',
                         action='store_const',
                         const=True)
 
-    optype.add_argument('-s',
-                        '--set',
+    optype.add_argument('-a',
+                        '--apply',
                         dest='colorscheme',
-                        help='Set colorscheme',
+                        help='Apply colorscheme',
                         metavar='colorscheme',
                         type=str)
 
@@ -48,6 +48,13 @@ def parse():
                         help='Toggle colorschemes',
                         metavar='colorschemes',
                         nargs='+')
+
+    optype.add_argument('-T',
+                        '--toggle-available',
+                        dest='toggle_available',
+                        help='Toggle all available colorschemes',
+                        action='store_const',
+                        const=True)
 
     parser.add_argument('-c',
                         '--config-file',
@@ -59,7 +66,7 @@ def parse():
                         required=False)
 
     parser.add_argument('-C',
-                        '--colorscheme-dir',
+                        '--colorscheme-directory',
                         dest='colorscheme_dir',
                         help='Path to colorscheme directory',
                         metavar='colorscheme directory',
@@ -134,7 +141,7 @@ def replace_colorscheme(colors_path, config_path, colorscheme):
 def main():
     args = parse()
 
-    if args.show_available_colorschemes:
+    if args.list_available_colorschemes:
         files = get_files_in_directory(args.colorscheme_dir)
         for file in files:
             print(file)
@@ -147,6 +154,17 @@ def main():
             if colorscheme in args.colorschemes else -1
         index = (realindex + 1) % len(args.colorschemes)
         applicable_colorscheme = args.colorschemes[index]
+
+        colors_path = join(args.colorscheme_dir, applicable_colorscheme)
+        replace_colorscheme(colors_path, args.config_file,
+                            applicable_colorscheme)
+    elif args.toggle_available:
+        colorschemes = get_files_in_directory(args.colorscheme_dir)
+        colorscheme = get_applied_colorscheme(args.config_file)
+        realindex = colorschemes.index(colorscheme)\
+            if colorscheme in colorschemes else -1
+        index = (realindex + 1) % len(colorschemes)
+        applicable_colorscheme = colorschemes[index]
 
         colors_path = join(args.colorscheme_dir, applicable_colorscheme)
         replace_colorscheme(colors_path, args.config_file,
