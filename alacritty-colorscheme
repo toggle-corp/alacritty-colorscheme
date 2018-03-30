@@ -16,7 +16,7 @@ def parse():
 
     parser = argparse.ArgumentParser(
         "alacritty-colorscheme",
-        description="Change alacritty colorscheme."
+        description="Change colorscheme of alacritty with ease."
     )
 
     optype = parser.add_mutually_exclusive_group(required=True)
@@ -106,7 +106,7 @@ def get_files_in_directory(path):
 
 def replace_colorscheme(colors_path, config_path, colorscheme):
     try:
-        with open(config_path, 'r') as config_file,\
+        with open(config_path, 'r+') as config_file,\
                 open(colors_path, 'r') as color_file:
             config_lines = config_file.readlines()
             color_lines = color_file.readlines()
@@ -132,8 +132,9 @@ def replace_colorscheme(colors_path, config_path, colorscheme):
                 + config_lines[end_index:]
             )
 
-            with open(config_path, 'w') as config_file:
-                config_file.writelines(new_lines)
+            config_file.seek(0)
+            config_file.writelines(new_lines)
+            config_file.truncate()
     except Exception as e:
         print(e)
 
