@@ -2,6 +2,8 @@
 
 Change colorscheme of alacritty with ease.
 
+![Usage](https://user-images.githubusercontent.com/4928045/38159826-c451861a-34d0-11e8-979b-34b67027fb87.gif)
+
 ## Usage
 
 ```bash
