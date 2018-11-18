@@ -11,8 +11,8 @@ HOME = expanduser("~")
 
 
 def parse():
-    config_path = HOME + '/.config/alacritty/alacritty.yml'
-    colorscheme_dir = HOME + '/.config/alacritty/colors/'
+    config_path = join(HOME, '.config/alacritty/alacritty.yml')
+    colorscheme_dir = join(HOME, '.config/alacritty/colors/')
 
     parser = argparse.ArgumentParser(
         "alacritty-colorscheme",
