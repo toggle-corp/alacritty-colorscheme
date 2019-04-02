@@ -41,3 +41,10 @@ bindsym $mod+Shift+m exec $alacritty_colorscheme -T
 # Get notification with current colorscheme
 bindsym $mod+Shift+b exec notify-send "Alacritty Colorscheme" `$alacritty_colorscheme -s`
 ```
+
+
+## License
+
+Content of this repo is released under the [Apache License, Version 2.0].
+
+[Apache License, Version 2.0](./LICENSE-APACHE)
