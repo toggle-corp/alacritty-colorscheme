@@ -129,6 +129,7 @@ def replace_colorscheme(colors_path, config_path, colorscheme):
                 # Add currently applied colorscheme name
                 + ['# ' + colorscheme + '\n']
                 + color_lines
+                + ['\n']
                 + config_lines[end_index:]
             )
 
