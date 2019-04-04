@@ -4,6 +4,27 @@ Change colorscheme of alacritty with ease.
 
 ![Usage](https://user-images.githubusercontent.com/4928045/38159826-c451861a-34d0-11e8-979b-34b67027fb87.gif)
 
+To identify the color section in alacritty config, the program uses two markers: ``# color_start`` and ``# color_end``
+The markers should be placed before the color section and after the color section by the user.
+
+Example:
+```
+# color_start
+colors:
+    # Default colors
+    primary:
+        background: '0x1e2127'
+        foreground: '0xabb2bf'
+
+    # Normal colors
+    ...
+
+    # Bright colors
+    ...
+
+# color_end
+```
+
 ## Usage
 
 ```bash
@@ -29,19 +50,36 @@ optional arguments:
                         Path to colorscheme directory
 ```
 
+## Themes
+
+You can get the themes from ``https://github.com/eendroroy/alacritty-theme``
+
+```
+# Get themes
+git clone https://github.com/eendroroy/alacritty-theme.git ~/alacritty-theme
+
+# List available themes
+alacritty-colorscheme -C ~/alacritty-theme/themes -l
+
+# Toggle between the themes
+alacritty-colorscheme -C ~/alacritty-theme/themes -T
+```
+
 ## Bindings for i3wm
 
 ```
 # Set program location
 set $alacritty_colorscheme ~/.bin/alacritty-colorscheme
+
 # Toggle between light and dark colorscheme
 bindsym $mod+Shift+n exec $alacritty_colorscheme -t solarized-light.yml solarized-dark.yml
+
 # Toggle between all available colorscheme
 bindsym $mod+Shift+m exec $alacritty_colorscheme -T
+
 # Get notification with current colorscheme
 bindsym $mod+Shift+b exec notify-send "Alacritty Colorscheme" `$alacritty_colorscheme -s`
 ```
-
 
 ## License
 
