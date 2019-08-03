@@ -12,14 +12,16 @@ setup(
     version="0.1.0",
     description="Change colorscheme of alacritty with ease.",
     long_description=readme,
-    url="",
+    url="https://github.com/toggle-corp/alacritty-colorscheme",
+    author="Togglecorp",
     license=license,
-    install_requires=[],
+
     packages=find_packages(exclude=("tests", "docs")),
-    entry_points = {
+    python_requires=">= 3.0.0",
+    install_requires=[],
+    entry_points={
         "console_scripts": [
             "alacritty-colorscheme=alacritty_colorscheme.cli:main",
         ]
     }
 )
-

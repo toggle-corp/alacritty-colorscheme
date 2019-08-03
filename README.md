@@ -4,31 +4,9 @@ Change colorscheme of alacritty with ease.
 
 ![Usage](https://user-images.githubusercontent.com/4928045/38159826-c451861a-34d0-11e8-979b-34b67027fb87.gif)
 
-To identify the color section in alacritty config, the program uses two markers: ``# color_start`` and ``# color_end``
-The markers should be placed before the color section and after the color section by the user.
-
-Example:
-```
-# color_start
-colors:
-    # Default colors
-    primary:
-        background: '0x1e2127'
-        foreground: '0xabb2bf'
-
-    # Normal colors
-    ...
-
-    # Bright colors
-    ...
-
-# color_end
-```
-
 ## Usage
 
-```bash
-$ alacritty-colorscheme --help
+```
 usage: alacritty-colorscheme [-h]
                              (-s | -l | -a colorscheme | -t colorschemes [colorschemes ...] | -T)
                              [-c configuration file]
@@ -50,11 +28,52 @@ optional arguments:
                         Path to colorscheme directory
 ```
 
-## Themes
+## Installation
 
-You can get the themes from ``https://github.com/eendroroy/alacritty-theme``
+You can install it from pip:
 
+```bash
+pip install git+https://github.com/toggle-corp/alacritty-colorscheme.git
 ```
+
+Or, you can install the program manually:
+
+```bash
+# Get program
+git clone https://github.com/toggle-corp/alacritty-colorscheme.git
+
+# Install
+python setup.py install --user
+```
+
+To identify the color section in alacritty config, the program uses two
+markers: `# color_start` and `# color_end`. The markers should be placed before
+the color section and after the color section by the user.
+
+Example:
+```yml
+# color_start
+colors:
+    # Default colors
+    primary:
+        background: '0x1e2127'
+        foreground: '0xabb2bf'
+
+    # Normal colors
+    # ...
+
+    # Bright colors
+    # ...
+
+# color_end
+```
+
+
+## Getting themes
+
+You can get the themes from [eendroroy/alacritty-theme](https://github.com/eendroroy/alacritty-theme)
+
+```bash
 # Get themes
 git clone https://github.com/eendroroy/alacritty-theme.git ~/alacritty-theme
 
@@ -83,6 +102,6 @@ bindsym $mod+Shift+b exec notify-send "Alacritty Colorscheme" `$alacritty_colors
 
 ## License
 
-Content of this repo is released under the [Apache License, Version 2.0].
+Content of this repository is released under the [Apache License, Version 2.0].
 
 [Apache License, Version 2.0](./LICENSE-APACHE)
