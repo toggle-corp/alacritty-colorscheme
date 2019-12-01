@@ -7,11 +7,10 @@ Change colorscheme of alacritty with ease.
 ## Usage
 
 ```
-usage: alacritty-colorscheme [-h]
-                             (-s | -l | -a colorscheme | -t colorschemes [colorschemes ...] | -T)
-                             [-c configuration file]
-                             [-C colorscheme directory]
+usage: alacritty-colorscheme [-h] (-s | -l | -a colorscheme | -t colorschemes [colorschemes ...] | -T) [-c configuration file] [-C colorscheme directory] [-V]
+
 Change colorscheme of alacritty with ease.
+
 optional arguments:
   -h, --help            show this help message and exit
   -s, --show-applied    Show applied colorscheme
@@ -26,6 +25,7 @@ optional arguments:
                         Path to configuration file
   -C colorscheme directory, --colorscheme-directory colorscheme directory
                         Path to colorscheme directory
+  -V, --base16-vim      Support base16-vim
 ```
 
 ## Installation

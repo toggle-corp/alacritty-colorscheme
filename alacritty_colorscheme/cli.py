@@ -3,11 +3,19 @@
 import argparse
 import re
 from os import listdir
-from os.path import expanduser, isfile, join
+from os.path import expanduser, isfile, join, splitext
 
 COLORSCHEME_START = '# color_start\n'
 COLORSCHEME_END = '# color_end\n'
 HOME = expanduser("~")
+
+
+def generate_vimrc_background(colorscheme):
+    command = (
+        f"if !exists('g:colors_name') || g:colors_name != '{colorscheme}'\n"
+        f"  colorscheme {colorscheme}\n"
+        "endif")
+    return command
 
 
 def parse():
@@ -74,6 +82,12 @@ def parse():
                         default=colorscheme_dir,
                         required=False)
 
+    parser.add_argument('-V',
+                        '--base16-vim',
+                        dest='base16_vim',
+                        help='Support base16-vim',
+                        action='store_const',
+                        const=True)
     return parser.parse_args()
 
 
@@ -104,8 +118,10 @@ def get_files_in_directory(path):
     return sorted(onlyfiles)
 
 
-def replace_colorscheme(colors_path, config_path, colorscheme):
+def replace_colorscheme(colors_path, config_path, colorscheme, base16_vim):
     try:
+        vimrc_background_path = join(HOME, '.vimrc_background')
+
         with open(config_path, 'r+') as config_file,\
                 open(colors_path, 'r') as color_file:
             config_lines = config_file.readlines()
@@ -136,6 +152,13 @@ def replace_colorscheme(colors_path, config_path, colorscheme):
             config_file.seek(0)
             config_file.writelines(new_lines)
             config_file.truncate()
+
+            if base16_vim:
+                with open(vimrc_background_path, 'w') as vimrc_background_file:
+                    colorscheme_no_extension = splitext(colorscheme)[0]
+                    vimrc_background_content = generate_vimrc_background(
+                        colorscheme_no_extension)
+                    vimrc_background_file.write(vimrc_background_content)
     except Exception as e:
         print(e)
 
@@ -159,7 +182,7 @@ def main():
 
         colors_path = join(args.colorscheme_dir, applicable_colorscheme)
         replace_colorscheme(colors_path, args.config_file,
-                            applicable_colorscheme)
+                            applicable_colorscheme, args.base16_vim)
     elif args.toggle_available:
         colorschemes = get_files_in_directory(args.colorscheme_dir)
         colorscheme = get_applied_colorscheme(args.config_file)
@@ -170,10 +193,11 @@ def main():
 
         colors_path = join(args.colorscheme_dir, applicable_colorscheme)
         replace_colorscheme(colors_path, args.config_file,
-                            applicable_colorscheme)
+                            applicable_colorscheme, args.base16_vim)
     elif args.colorscheme:
         colors_path = join(args.colorscheme_dir, args.colorscheme)
-        replace_colorscheme(colors_path, args.config_file, args.colorscheme)
+        replace_colorscheme(colors_path, args.config_file,
+                            args.colorscheme, args.base16_vim)
 
 
 if __name__ == "__main__":
