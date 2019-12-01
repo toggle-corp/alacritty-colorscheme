@@ -46,9 +46,9 @@ git clone https://github.com/toggle-corp/alacritty-colorscheme.git
 python setup.py install --user
 ```
 
-To identify the color section in alacritty config, the program uses two
-markers: `# color_start` and `# color_end`. The markers should be placed before
-the color section and after the color section by the user.
+> To identify the color section in alacritty config, the program uses two
+> markers: `# color_start` and `# color_end`. The markers should be placed before
+> the color section and after the color section by the user.
 
 Example:
 ```yml
@@ -75,13 +75,26 @@ You can get the themes from [eendroroy/alacritty-theme](https://github.com/eendr
 
 ```bash
 # Get themes
-git clone https://github.com/eendroroy/alacritty-theme.git ~/alacritty-theme
+git clone https://github.com/eendroroy/alacritty-theme.git ~/.eendroroy-alacritty-theme
 
 # List available themes
-alacritty-colorscheme -C ~/alacritty-theme/themes -l
+alacritty-colorscheme -C ~/.eendroroy-alacritty-theme/themes -l
 
 # Toggle between the themes
-alacritty-colorscheme -C ~/alacritty-theme/themes -T
+alacritty-colorscheme -C ~/.eendroroy-alacritty-theme/themes -T
+```
+
+You can alternatively get themes from [aaron-williamson/base16-alacritty](https://github.com/aaron-williamson/base16-alacritty)
+
+```bash
+# Get themes
+git clone https://github.com/aaron-williamson/base16-alacritty.git ~/.aaron-williamson-alacritty-theme
+
+# List available themes
+alacritty-colorscheme -C ~/.aaron-williamson-alacritty-theme/colors -l
+
+# Toggle between the themes
+alacritty-colorscheme -C ~/.aaron-williamson-alacritty-theme/colors -T
 ```
 
 ## Bindings for i3wm
