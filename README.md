@@ -39,10 +39,14 @@ pip install --user alacritty-colorscheme
 ## Running locally
 
 ```bash
+# Install poetry
+pip install --user poetry
+
 # Get program
 git clone https://github.com/toggle-corp/alacritty-colorscheme.git
 
-# Install
+# Run program
+cd alacritty-colorscheme
 poetry install
 poetry run python alacritty_colorscheme/cli.py
 ```
@@ -83,7 +87,7 @@ alacritty-colorscheme -C $DEST/themes -T
 
 If you are using base16 colorschemes from
 [base16-vim](https://github.com/chriskempson/base16-vim), you can use the `-V`
-argument to generate `~/.vimrc_background` file while changing alacritty
+argument to generate `~/.vimrc_background` file when you change alacritty
 colorscheme.
 
 You will need to source the file in your vimrc to load the appropriate
