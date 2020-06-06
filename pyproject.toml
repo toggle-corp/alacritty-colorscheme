@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "alacritty-colorscheme"
+version = "0.1.1"
+description = "Change colorscheme of alacritty with ease"
+license="Apache-2.0"
+authors = ["Safar Ligal <weathermist@gmail.com>"]
+readme = "README.md"
+repository = "https://github.com/toggle-corp/alacritty-colorscheme/"
+keywords = [
+    "alacritty",
+    "colorscheme",
+    "theme",
+    "base16",
+    "vim"
+]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+"ruamel.yaml" = "^0.16.10"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[tool.poetry.scripts]
+alacritty-colorscheme = 'alacritty_colorscheme.cli:main'
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 
 import argparse
+import pprint
 import re
-from os import listdir
+import sys
+import tempfile
+import typing
+from os import listdir, replace, unlink
 from os.path import expanduser, isfile, join, splitext
+from shutil import copyfile
 
-COLORSCHEME_START = '# color_start\n'
-COLORSCHEME_END = '# color_end\n'
-HOME = expanduser("~")
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import Comment
+from ruamel.yaml.error import CommentMark
+from ruamel.yaml.tokens import CommentToken
 
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
 
-def generate_vimrc_background(colorscheme):
-    command = (
-        f"if !exists('g:colors_name') || g:colors_name != '{colorscheme}'\n"
-        f"  colorscheme {colorscheme}\n"
-        "endif")
-    return command
-
-
-def parse():
-    config_path = join(HOME, '.config/alacritty/alacritty.yml')
-    colorscheme_dir = join(HOME, '.config/alacritty/colors/')
+def parse_args():
+    config_path = join('~', '.config/alacritty/alacritty.yml')
+    colorscheme_dir = join('~', '.config/alacritty/colors/')
 
     parser = argparse.ArgumentParser(
         "alacritty-colorscheme",
@@ -90,89 +90,109 @@ def parse():
                         const=True)
     return parser.parse_args()
 
-
-def get_applied_colorscheme(config_path):
-    try:
-        start_index = -1
-        with open(config_path, 'r') as config_file:
-            config_lines = config_file.readlines()
-            for i, line in enumerate(config_lines):
-                if line == COLORSCHEME_START:
-                    start_index = i
-                    break
-        if start_index < 0:
-            return None
-
-        colorscheme_line = config_lines[start_index+1]
-        colorscheme_re = re.search('# (.*)\s*', colorscheme_line)
-        if colorscheme_re:
-            return colorscheme_re.group(1)
-        return None
-    except Exception as e:
-        print(e)
-        return None
-
-
-def get_files_in_directory(path):
-    onlyfiles = [f for f in listdir(path) if isfile(join(path, f))]
+def get_files_in_directory(path: str) -> typing.List[str]:
+    expanded_path = expanduser(path)
+    onlyfiles = [f for f in (listdir(expanded_path)) if isfile(join(expanded_path, f))]
     return sorted(onlyfiles)
 
+def generate_vimrc_background(colorscheme: str) -> str:
+    command = (
+        f"if !exists('g:colors_name') || g:colors_name != '{colorscheme}'\n"
+        f"  colorscheme {colorscheme}\n"
+        "endif")
+    return command
 
-def replace_colorscheme(colors_path, config_path, colorscheme, base16_vim):
+# function to identify if a given yaml.Comment internally has at least one comment
+def has_comment_token(colors_comment: Comment) -> bool:
+    if not colors_comment or len(colors_comment) < 2:
+        return False
+
+    comment_tokens = colors_comment[1]
+    return comment_tokens and len(comment_tokens) >= 1
+
+def get_applied_colorscheme(config_path: str) -> typing.Optional[str]:
     try:
-        vimrc_background_path = join(HOME, '.vimrc_background')
+        with open(expanduser(config_path), 'r') as config_file:
+            config_yaml = yaml.load(config_file)
 
-        with open(config_path, 'r+') as config_file,\
-                open(colors_path, 'r') as color_file:
-            config_lines = config_file.readlines()
-            color_lines = color_file.readlines()
+            if not has_comment_token(config_yaml['colors'].ca.comment):
+                return None
 
-            start_index = 0
-            end_index = 0
-            for i, line in enumerate(config_lines):
-                if line == COLORSCHEME_START:
-                    start_index = i
-                elif line == COLORSCHEME_END:
-                    # NOTE: Possibly break after end_index
-                    end_index = i
-
-            if start_index >= end_index:
-                print('Bad configuration file.')
-                return
-
-            new_lines = (
-                config_lines[:start_index + 1]
-                # Add currently applied colorscheme name
-                + ['# ' + colorscheme + '\n']
-                + color_lines
-                + ['\n']
-                + config_lines[end_index:]
+            comment_match = re.match(
+                r"#\s*COLORSCHEME:\s*(.*)\s*\n",
+                config_yaml['colors'].ca.comment[1][0].value,
             )
 
-            config_file.seek(0)
-            config_file.writelines(new_lines)
-            config_file.truncate()
+            if not comment_match:
+                return None
 
-            if base16_vim:
-                with open(vimrc_background_path, 'w') as vimrc_background_file:
-                    colorscheme_no_extension = splitext(colorscheme)[0]
-                    vimrc_background_content = generate_vimrc_background(
-                        colorscheme_no_extension)
-                    vimrc_background_file.write(vimrc_background_content)
+            comment_groups = comment_match.groups()
+            return comment_groups[0]
     except Exception as e:
         print(e)
+        return None
 
+def replace_colorscheme(colors_path: str, config_path: str, colorscheme: str, base16_vim: bool):
+    with open(expanduser(config_path), 'r') as config_file,\
+            open(expanduser(colors_path), 'r') as color_file,\
+            tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+        config_yaml = yaml.load(config_file)
+        colors_yaml = yaml.load(color_file)
+
+        # NOTE: update method doesn't read the first comment
+        config_yaml['colors'].update(colors_yaml['colors'])
+
+        new_comment_token = CommentToken(
+            f'# COLORSCHEME: {colorscheme}\n',
+            CommentMark(2),
+            None,
+        )
+
+        if has_comment_token(config_yaml['colors'].ca.comment):
+            # removing all comments for colors in config_file
+            while len(config_yaml['colors'].ca.comment[1]) > 0:
+                config_yaml['colors'].ca.comment[1].pop()
+
+            # adding current colorscheme name in comment
+            config_yaml['colors'].ca.comment[1].append(new_comment_token)
+        else:
+            # adding current colorscheme name in comment
+            config_yaml['colors'].ca.comment = [None, [new_comment_token]]
+
+        # adding all comments for colors from colors_file
+        if has_comment_token(colors_yaml['colors'].ca.comment):
+            config_yaml['colors'].ca.comment[1].extend(colors_yaml['colors'].ca.comment[1])
+
+        # NOTE: not directly writing to config_file as it causes multiple reload during write
+        tmp_file_path = tmp_file.name
+        yaml.dump(config_yaml, tmp_file)
+
+    copyfile(tmp_file_path, expanduser(config_path));
+    unlink(tmp_file_path)
+
+    if base16_vim:
+        vimrc_background_path = join('~', '.vimrc_background')
+        with open(expanduser(vimrc_background_path), 'w') as vimrc_background_file:
+            colorscheme_no_extension = splitext(colorscheme)[0]
+            vimrc_background_content = generate_vimrc_background(
+                colorscheme_no_extension
+            )
+            vimrc_background_file.write(vimrc_background_content)
 
 def main():
-    args = parse()
+    args = parse_args()
 
     if args.list_available_colorschemes:
         files = get_files_in_directory(args.colorscheme_dir)
         for file in files:
             print(file)
-    if args.show_applied_colorscheme:
+    elif args.show_applied_colorscheme:
         colorscheme = get_applied_colorscheme(args.config_file)
         print(colorscheme)
+    elif args.colorscheme:
+        colors_path = join(args.colorscheme_dir, args.colorscheme)
+        replace_colorscheme(colors_path, args.config_file,
+                            args.colorscheme, args.base16_vim)
     elif args.colorschemes:
         colorscheme = get_applied_colorscheme(args.config_file)
         realindex = args.colorschemes.index(colorscheme)\
@@ -194,10 +214,6 @@ def main():
         colors_path = join(args.colorscheme_dir, applicable_colorscheme)
         replace_colorscheme(colors_path, args.config_file,
                             applicable_colorscheme, args.base16_vim)
-    elif args.colorscheme:
-        colors_path = join(args.colorscheme_dir, args.colorscheme)
-        replace_colorscheme(colors_path, args.config_file,
-                            args.colorscheme, args.base16_vim)
 
 
 if __name__ == "__main__":

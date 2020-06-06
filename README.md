@@ -33,41 +33,19 @@ optional arguments:
 You can install it from pip:
 
 ```bash
-pip install git+https://github.com/toggle-corp/alacritty-colorscheme.git
+pip install --user alacritty-colorscheme
 ```
 
-Or, you can install the program manually:
+## Running locally
 
 ```bash
 # Get program
 git clone https://github.com/toggle-corp/alacritty-colorscheme.git
 
 # Install
-python setup.py install --user
+poetry install
+poetry run python alacritty_colorscheme/cli.py
 ```
-
-> To identify the color section in alacritty config, the program uses two
-> markers: `# color_start` and `# color_end`. The markers should be placed before
-> the color section and after the color section by the user.
-
-### Example:
-```yml
-# color_start
-colors:
-    # Default colors
-    primary:
-        background: '0x1e2127'
-        foreground: '0xabb2bf'
-
-    # Normal colors
-    # ...
-
-    # Bright colors
-    # ...
-
-# color_end
-```
-
 
 ## Getting themes
 
@@ -101,7 +79,7 @@ alacritty-colorscheme -C $DEST/themes -l
 alacritty-colorscheme -C $DEST/themes -T
 ```
 
-## Synchronizing with vim
+## Synchronizing with vim/neovim
 
 If you are using base16 colorschemes from
 [base16-vim](https://github.com/chriskempson/base16-vim), you can use the `-V`
@@ -139,7 +117,7 @@ Reload a neovim session using:
 nvr -cc "source ~/.config/nvim/init.vim"
 ```
 
-## Example configuration (base16-vim + neovim + neovim-remote)
+## Example bash/zsh configuration (base16-vim + neovim + neovim-remote)
 
 You can add this example configuration in your .zshrc or .bashrc to switch
 between dark and light theme.
@@ -160,17 +138,17 @@ alias day="alacritty-colorscheme -C $COLOR_DIR -a $LIGHT_COLOR -V && reload_nvim
 alias night="alacritty-colorscheme -C $COLOR_DIR -a $DARK_COLOR -V && reload_nvim"
 ```
 
-## Bindings for i3wm
+## Bindings for i3wm/sway
 
 ```bash
 # Toggle between light and dark colorscheme
-bindsym $mod+Shift+n exec alacritty_colorscheme -t solarized-light.yml solarized-dark.yml
+bindsym $mod+Shift+n exec alacritty-colorscheme -t solarized-light.yml solarized-dark.yml
 
 # Toggle between all available colorscheme
-bindsym $mod+Shift+m exec alacritty_colorscheme -T
+bindsym $mod+Shift+m exec alacritty-colorscheme -T
 
 # Get notification with current colorscheme
-bindsym $mod+Shift+b exec notify-send "Alacritty Colorscheme" `alacritty_colorscheme -s`
+bindsym $mod+Shift+b exec notify-send "Alacritty Colorscheme" `alacritty-colorscheme -s`
 ```
 
 ## License
