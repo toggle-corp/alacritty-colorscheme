@@ -56,31 +56,19 @@ poetry run python alacritty_colorscheme/cli.py
 You can get themes from [aaron-williamson/base16-alacritty](https://github.com/aaron-williamson/base16-alacritty)
 
 ```bash
-DEST="~/.aaron-williamson-alacritty-theme"
+DEST="$HOME/.aaron-williamson-alacritty-theme"
 
 # Get themes
 git clone https://github.com/aaron-williamson/base16-alacritty.git $DEST
-
-# List available themes
-alacritty-colorscheme -C $DEST/colors -l
-
-# Toggle between the themes
-alacritty-colorscheme -C $DEST/colors -T
 ```
 
 You can alternatively get themes from from [eendroroy/alacritty-theme](https://github.com/eendroroy/alacritty-theme)
 
 ```bash
-DEST="~/.eendroroy-alacritty-theme"
+DEST="$HOME/.eendroroy-alacritty-theme"
 
 # Get themes
 git clone https://github.com/eendroroy/alacritty-theme.git $DEST
-
-# List available themes
-alacritty-colorscheme -C $DEST/themes -l
-
-# Toggle between the themes
-alacritty-colorscheme -C $DEST/themes -T
 ```
 
 ## Synchronizing with vim/neovim
@@ -134,7 +122,7 @@ function reload_nvim {
     done
 }
 
-COLOR_DIR="~/.aaron-williamson-alacritty-theme/colors"
+COLOR_DIR="$HOME/.aaron-williamson-alacritty-theme/colors"
 LIGHT_COLOR='base16-gruvbox-light-soft.yml'
 DARK_COLOR='base16-gruvbox-dark-soft.yml'
 
@@ -142,17 +130,21 @@ alias day="alacritty-colorscheme -C $COLOR_DIR -a $LIGHT_COLOR -V && reload_nvim
 alias night="alacritty-colorscheme -C $COLOR_DIR -a $DARK_COLOR -V && reload_nvim"
 ```
 
-## Bindings for i3wm/sway
+## Example i3wm/sway configuration
 
 ```bash
+set $color_dir $HOME/.aaron-williamson-alacritty-theme/colors
+set $light_color base16-gruvbox-light-soft.yml
+set $dark_color base16-gruvbox-dark-soft.yml
+
 # Toggle between light and dark colorscheme
-bindsym $mod+Shift+n exec alacritty-colorscheme -t solarized-light.yml solarized-dark.yml
+bindsym $mod+Shift+n exec alacritty-colorscheme -C $color_dir -t $light_color $dark_color
 
 # Toggle between all available colorscheme
-bindsym $mod+Shift+m exec alacritty-colorscheme -T
+bindsym $mod+Shift+m exec alacritty-colorscheme -C $color_dir -T
 
 # Get notification with current colorscheme
-bindsym $mod+Shift+b exec notify-send "Alacritty Colorscheme" `alacritty-colorscheme -s`
+bindsym $mod+Shift+b exec notify-send "Alacritty Colorscheme" `alacritty-colorscheme -C $color_dir -s`
 ```
 
 ## License

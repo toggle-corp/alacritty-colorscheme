@@ -139,8 +139,11 @@ def replace_colorscheme(colors_path: str, config_path: str, colorscheme: str, ba
         config_yaml = yaml.load(config_file)
         colors_yaml = yaml.load(color_file)
 
-        # NOTE: update method doesn't read the first comment
-        config_yaml['colors'].update(colors_yaml['colors'])
+        if config_yaml['colors']:
+            # NOTE: update method doesn't read the first comment
+            config_yaml['colors'].update(colors_yaml['colors'])
+        else:
+            config_yaml['colors'] = colors_yaml['colors']
 
         new_comment_token = CommentToken(
             f'# COLORSCHEME: {colorscheme}\n',
