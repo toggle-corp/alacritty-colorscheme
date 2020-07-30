@@ -21,6 +21,7 @@ optional arguments:
                         Toggle colorschemes
   -T, --toggle-available
                         Toggle all available colorschemes
+  -r, --reverse-toggle  Toggle through themes in reverse order
   -c configuration file, --config-file configuration file
                         Path to configuration file
   -C colorscheme directory, --colorscheme-directory colorscheme directory
