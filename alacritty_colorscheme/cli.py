@@ -66,7 +66,7 @@ def parse_args():
     parser.add_argument('-r',
                         '--reverse-toggle',
                         dest='reverse_toggle',
-                        help='Toggle through themes in reverse order',
+                        help='Toggle through colorschemes in reverse order',
                         action='store_true')
 
     parser.add_argument('-c',

@@ -7,7 +7,7 @@ Change colorscheme of alacritty with ease.
 ## Usage
 
 ```
-usage: alacritty-colorscheme [-h] (-s | -l | -a colorscheme | -t colorschemes [colorschemes ...] | -T) [-c configuration file] [-C colorscheme directory] [-V]
+usage: alacritty-colorscheme [-h] (-s | -l | -a colorscheme | -t colorschemes [colorschemes ...] | -T) [-r] [-c configuration file] [-C colorscheme directory] [-V]
 
 Change colorscheme of alacritty with ease.
 
@@ -21,7 +21,7 @@ optional arguments:
                         Toggle colorschemes
   -T, --toggle-available
                         Toggle all available colorschemes
-  -r, --reverse-toggle  Toggle through themes in reverse order
+  -r, --reverse-toggle  Toggle through colorschemes in reverse order
   -c configuration file, --config-file configuration file
                         Path to configuration file
   -C colorscheme directory, --colorscheme-directory colorscheme directory
