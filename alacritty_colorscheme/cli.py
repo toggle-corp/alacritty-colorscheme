@@ -64,6 +64,12 @@ def parse_args():
                         action='store_const',
                         const=True)
 
+    parser.add_argument('-r',
+                        '--reverse-toggle',
+                        dest='reverse_toggle',
+                        help='Toggle through themes in reverse order',
+                        action='store_true')
+
     parser.add_argument('-c',
                         '--config-file',
                         dest='config_file',
@@ -182,6 +188,17 @@ def replace_colorscheme(colors_path: str, config_path: str, colorscheme: str, ba
             )
             vimrc_background_file.write(vimrc_background_content)
 
+def get_applicable_colorscheme(colorschemes, colorscheme, reverse_toggle):
+    if colorscheme in colorschemes:
+        realindex = colorschemes.index(colorscheme)
+        inc = len(colorschemes) - 1 if reverse_toggle else 1
+        index = (realindex + inc) % len(colorschemes)
+    else:
+        index = 0
+
+    applicable_colorscheme = colorschemes[index]
+    return applicable_colorscheme
+
 def main():
     args = parse_args()
 
@@ -198,10 +215,8 @@ def main():
                             args.colorscheme, args.base16_vim)
     elif args.colorschemes:
         colorscheme = get_applied_colorscheme(args.config_file)
-        realindex = args.colorschemes.index(colorscheme)\
-            if colorscheme in args.colorschemes else -1
-        index = (realindex + 1) % len(args.colorschemes)
-        applicable_colorscheme = args.colorschemes[index]
+        applicable_colorscheme = get_applicable_colorscheme(args.colorschemes,
+                colorscheme, args.reverse_toggle)
 
         colors_path = join(args.colorscheme_dir, applicable_colorscheme)
         replace_colorscheme(colors_path, args.config_file,
@@ -209,10 +224,8 @@ def main():
     elif args.toggle_available:
         colorschemes = get_files_in_directory(args.colorscheme_dir)
         colorscheme = get_applied_colorscheme(args.config_file)
-        realindex = colorschemes.index(colorscheme)\
-            if colorscheme in colorschemes else -1
-        index = (realindex + 1) % len(colorschemes)
-        applicable_colorscheme = colorschemes[index]
+        applicable_colorscheme = get_applicable_colorscheme(colorschemes,
+                colorscheme, args.reverse_toggle)
 
         colors_path = join(args.colorscheme_dir, applicable_colorscheme)
         replace_colorscheme(colors_path, args.config_file,
