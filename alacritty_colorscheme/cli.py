@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
-import pprint
 import re
-import sys
 import tempfile
 import typing
-from os import listdir, replace, unlink
+from os import listdir, unlink
 from os.path import expanduser, isfile, join, splitext
 from shutil import copyfile
 
@@ -17,6 +15,7 @@ from ruamel.yaml.tokens import CommentToken
 
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
+
 
 def parse_args():
     config_path = join('~', '.config/alacritty/alacritty.yml')
@@ -67,7 +66,7 @@ def parse_args():
     parser.add_argument('-r',
                         '--reverse-toggle',
                         dest='reverse_toggle',
-                        help='Toggle through themes in reverse order',
+                        help='Toggle through colorschemes in reverse order',
                         action='store_true')
 
     parser.add_argument('-c',
@@ -96,10 +95,13 @@ def parse_args():
                         const=True)
     return parser.parse_args()
 
+
 def get_files_in_directory(path: str) -> typing.List[str]:
     expanded_path = expanduser(path)
-    onlyfiles = [f for f in (listdir(expanded_path)) if isfile(join(expanded_path, f))]
+    onlyfiles = [f for f in (listdir(expanded_path))
+                 if isfile(join(expanded_path, f))]
     return sorted(onlyfiles)
+
 
 def generate_vimrc_background(colorscheme: str) -> str:
     command = (
@@ -108,13 +110,16 @@ def generate_vimrc_background(colorscheme: str) -> str:
         "endif")
     return command
 
-# function to identify if a given yaml.Comment internally has at least one comment
+
+# function to identify if a given yaml.Comment internally has
+# at least one comment
 def has_comment_token(colors_comment: Comment) -> bool:
     if not colors_comment or len(colors_comment) < 2:
         return False
 
     comment_tokens = colors_comment[1]
     return comment_tokens and len(comment_tokens) >= 1
+
 
 def get_applied_colorscheme(config_path: str) -> typing.Optional[str]:
     try:
@@ -138,7 +143,9 @@ def get_applied_colorscheme(config_path: str) -> typing.Optional[str]:
         print(e)
         return None
 
-def replace_colorscheme(colors_path: str, config_path: str, colorscheme: str, base16_vim: bool):
+
+def replace_colorscheme(colors_path: str, config_path: str, colorscheme: str,
+                        base16_vim: bool):
     with open(expanduser(config_path), 'r') as config_file,\
             open(expanduser(colors_path), 'r') as color_file,\
             tempfile.NamedTemporaryFile(delete=False) as tmp_file:
@@ -170,13 +177,16 @@ def replace_colorscheme(colors_path: str, config_path: str, colorscheme: str, ba
 
         # adding all comments for colors from colors_file
         if has_comment_token(colors_yaml['colors'].ca.comment):
-            config_yaml['colors'].ca.comment[1].extend(colors_yaml['colors'].ca.comment[1])
+            config_yaml['colors'].ca.comment[1].extend(
+                colors_yaml['colors'].ca.comment[1]
+            )
 
-        # NOTE: not directly writing to config_file as it causes multiple reload during write
+        # NOTE: not directly writing to config_file as it causes
+        # multiple reload during write
         tmp_file_path = tmp_file.name
         yaml.dump(config_yaml, tmp_file)
 
-    copyfile(tmp_file_path, expanduser(config_path));
+    copyfile(tmp_file_path, expanduser(config_path))
     unlink(tmp_file_path)
 
     if base16_vim:
@@ -188,16 +198,18 @@ def replace_colorscheme(colors_path: str, config_path: str, colorscheme: str, ba
             )
             vimrc_background_file.write(vimrc_background_content)
 
+
 def get_applicable_colorscheme(colorschemes, colorscheme, reverse_toggle):
     if colorscheme in colorschemes:
         realindex = colorschemes.index(colorscheme)
-        inc = len(colorschemes) - 1 if reverse_toggle else 1
+        inc = - 1 if reverse_toggle else 1
         index = (realindex + inc) % len(colorschemes)
     else:
         index = 0
 
     applicable_colorscheme = colorschemes[index]
     return applicable_colorscheme
+
 
 def main():
     args = parse_args()
@@ -215,8 +227,9 @@ def main():
                             args.colorscheme, args.base16_vim)
     elif args.colorschemes:
         colorscheme = get_applied_colorscheme(args.config_file)
-        applicable_colorscheme = get_applicable_colorscheme(args.colorschemes,
-                colorscheme, args.reverse_toggle)
+        applicable_colorscheme = get_applicable_colorscheme(
+            args.colorschemes, colorscheme, args.reverse_toggle,
+        )
 
         colors_path = join(args.colorscheme_dir, applicable_colorscheme)
         replace_colorscheme(colors_path, args.config_file,
@@ -224,8 +237,9 @@ def main():
     elif args.toggle_available:
         colorschemes = get_files_in_directory(args.colorscheme_dir)
         colorscheme = get_applied_colorscheme(args.config_file)
-        applicable_colorscheme = get_applicable_colorscheme(colorschemes,
-                colorscheme, args.reverse_toggle)
+        applicable_colorscheme = get_applicable_colorscheme(
+            colorschemes, colorscheme, args.reverse_toggle,
+        )
 
         colors_path = join(args.colorscheme_dir, applicable_colorscheme)
         replace_colorscheme(colors_path, args.config_file,
