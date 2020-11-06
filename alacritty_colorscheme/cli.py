@@ -152,10 +152,10 @@ def replace_colorscheme(colors_path: str, config_path: str, colorscheme: str,
         config_yaml = yaml.load(config_file)
         colors_yaml = yaml.load(color_file)
 
-        if config_yaml['colors']:
+        try:
             # NOTE: update method doesn't read the first comment
             config_yaml['colors'].update(colors_yaml['colors'])
-        else:
+        except KeyError:
             config_yaml['colors'] = colors_yaml['colors']
 
         new_comment_token = CommentToken(
