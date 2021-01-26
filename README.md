@@ -1,8 +1,18 @@
 # Alacritty Colorscheme
 
+![PyPI](https://img.shields.io/pypi/v/alacritty-colorscheme) ![PyPI - Downloads](https://img.shields.io/pypi/dm/alacritty-colorscheme)
+
 Change colorscheme of alacritty with ease.
 
-![Usage](https://user-images.githubusercontent.com/4928045/38159826-c451861a-34d0-11e8-979b-34b67027fb87.gif)
+![Usage](https://user-images.githubusercontent.com/4928045/105879854-c7170680-602a-11eb-86d5-d9e89a68f229.gif)
+
+## Installation
+
+You can install alacritty-colorscheme using pip:
+
+```bash
+pip install --user alacritty-colorscheme
+```
 
 ## Usage
 
@@ -11,44 +21,75 @@ usage: alacritty-colorscheme [-c configuration file] [-C colorscheme directory] 
                              {list,status,toggle,apply} ...
 ```
 
-## Installation
+## Getting colorschemes
 
-You can install it from pip:
+- You can get colorschemes from [aaron-williamson/base16-alacritty](https://github.com/aaron-williamson/base16-alacritty)
 
+    ```bash
+    REPO="https://github.com/aaron-williamson/base16-alacritty.git"
+    DEST="$HOME/.aarors-williamson-colorschemes"
+
+    # Get colorschemes 
+    git clone $REPO $DEST
+    # Create symlink for colors (optional)
+    ln -s "$DEST/colors" "$HOME/.config/alacritty/color"
+    ```
+
+- You can also get colorschemes from from [eendroroy/alacritty-theme](https://github.com/eendroroy/alacritty-theme)
+
+    ```bash
+    REPO=htt#ps://github.com/eendroroy/alacritty-theme.git 
+    DEST="$HOME/.eendroroy-colorschemes"
+    # Get colorschemes
+    git clone $REPO $DEST
+    # Create symlink (optional)
+    ln -s "$DEST/themes" "$HOME/.config/alacritty/color"
+    ```
+
+## Examples 
+
+### bash/zsh aliases
+
+In `.zshrc` or `.bashrc` file:
 ```bash
-pip install --user alacritty-colorscheme
+LIGHT_COLOR='base16-gruvbox-light-soft.yml'
+DARK_COLOR='base16-gruvbox-dark-soft.yml'
+
+alias day="alacritty-colorscheme -V apply $LIGHT_COLOR && reload_nvim"
+alias night="alacritty-colorscheme -V apply $DARK_COLOR && reload_nvim"
+alias toggle="alacritty-colorscheme -V toggle $LIGHT_COLOR $DARK_COLOR && reload_nvim"
 ```
 
-## Getting themes
+### i3wm/sway bindings
 
-- You can get themes from [aaron-williamson/base16-alacritty](https://github.com/aaron-williamson/base16-alacritty)
-
+In `config` file:
 ```bash
-DEST="$HOME/.aaron-williamson-alacritty-theme"
+set $light_color base16-gruvbox-light-soft.yml
+set $dark_color base16-gruvbox-dark-soft.yml
 
-# Get themes
-git clone https://github.com/aaron-williamson/base16-alacritty.git $DEST
+# Toggle between light and dark colorschemes
+bindsym $mod+Shift+n exec alacritty-colorscheme toggle $light_color $dark_color
+
+# Toggle between all available colorschemes
+bindsym $mod+Shift+m exec alacritty-colorscheme toggle
+
+# Get notification with current colorscheme
+bindsym $mod+Shift+b exec notify-send "Alacritty Colorscheme" `alacritty-colorscheme status`
 ```
 
-- You can alternatively get themes from from [eendroroy/alacritty-theme](https://github.com/eendroroy/alacritty-theme)
+## FAQ
 
-```bash
-DEST="$HOME/.eendroroy-alacritty-theme"
-
-# Get themes
-git clone https://github.com/eendroroy/alacritty-theme.git $DEST
-```
-
-## Synchronizing with vim/neovim
+### How to make vim use same colorscheme as alacritty?
 
 If you are using base16 colorschemes from
 [base16-vim](https://github.com/chriskempson/base16-vim) plugin, you can use
 the `-V` argument to generate `~/.vimrc_background` file when you change
 alacritty colorscheme.
 
-You will need to source the file in your vimrc to load the appropriate
-colorscheme in vim. Add the following in your vimrc file:
+You will need to source this file in your vimrc to load the appropriate
+colorscheme in vim.
 
+In your `.vimrc` file:
 ```vim
 if filereadable(expand("~/.vimrc_background"))
   let base16colorspace=256          " Remove this line if not necessary
@@ -56,10 +97,10 @@ if filereadable(expand("~/.vimrc_background"))
 endif
 ```
 
-After changing alacritty colorscheme, you need to simply reload your vimrc
-configuration.
+Now, you simply need to reload your vim configuration after you change the
+alacritty colorscheme.
 
-### Reloading neovim configuration externally
+### Can I automatically reload my vim configuration?
 
 If you are using neovim, you can use
 [neovim-remote](https://github.com/mhinz/neovim-remote) to reload the nvim
@@ -71,50 +112,18 @@ Install neovim-remote:
 pip install --user neovim-remote
 ```
 
-Reload a neovim configuration using:
+Reload colorscheme in all neo-vim sessions using neovim-remote.
 
 ```bash
-nvr -cc "source ~/.config/nvim/init.vim"
-```
-
-## Example bash/zsh configuration (base16-vim + neovim + neovim-remote)
-
-You can add this example configuration in your .zshrc or .bashrc to switch
-between dark and light theme.
-This snippet creates two aliases: `day`, `night`
-
-```bash
-# Reload all nvim sessions
 function reload_nvim {
     for SERVER in $(nvr --serverlist); do
-        nvr -cc "source ~/.config/nvim/init.vim" --servername $SERVER &
+        # Just sourcing the code to apply new colorscheme
+        nvr --nostart -s -cc "source ~/.vimrc_background" --servername $SERVER &
     done
 }
-
-COLOR_DIR="$HOME/.aaron-williamson-alacritty-theme/colors"
-LIGHT_COLOR='base16-gruvbox-light-soft.yml'
-DARK_COLOR='base16-gruvbox-dark-soft.yml'
-
-alias day="alacritty-colorscheme -C $COLOR_DIR -V apply $LIGHT_COLOR && reload_nvim"
-alias night="alacritty-colorscheme -C $COLOR_DIR -V apply $DARK_COLOR && reload_nvim"
 ```
 
-## Example i3wm/sway configuration
-
-```bash
-set $color_dir $HOME/.aaron-williamson-alacritty-theme/colors
-set $light_color base16-gruvbox-light-soft.yml
-set $dark_color base16-gruvbox-dark-soft.yml
-
-# Toggle between light and dark colorschemes
-bindsym $mod+Shift+n exec alacritty-colorscheme -C $color_dir -V toggle $light_color $dark_color
-
-# Toggle between all available colorschemes
-bindsym $mod+Shift+m exec alacritty-colorscheme -C $color_dir -V toggle
-
-# Get notification with current colorscheme
-bindsym $mod+Shift+b exec notify-send "Alacritty Colorscheme" `alacritty-colorscheme -C $color_dir status`
-```
+## Development
 
 ## Running locally
 
@@ -124,8 +133,15 @@ pip install --user poetry
 
 git clone https://github.com/toggle-corp/alacritty-colorscheme.git
 cd alacritty-colorscheme
+
 poetry install
 poetry run python alacritty_colorscheme/cli.py
+```
+
+### Installing locally
+
+```bash
+pip install --user .
 ```
 
 ## License
