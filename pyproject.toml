@@ -24,6 +24,7 @@ classifiers = [
 python = "^3.6"
 "ruamel.yaml" = "^0.16.10"
 typed-argument-parser = "^1.6.1"
+pynvim = "^0.4.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
