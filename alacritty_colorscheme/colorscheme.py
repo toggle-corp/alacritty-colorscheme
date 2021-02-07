@@ -48,6 +48,7 @@ def replace_colorscheme(
     config_path: str,
     colorscheme: str,
     base16_vim: bool,
+    debug: bool,
 ) -> None:
     try:
         with open(expanduser(config_path), 'r') as config_file:
@@ -103,6 +104,9 @@ def replace_colorscheme(
     except OSError:
         print(f'Could not modify alacritty config file: {config_path}')
         return
+
+    if debug:
+        print(f'Applied colorscheme: {colorscheme}')
 
     if base16_vim:
         vimrc_background_path = join('~', '.vimrc_background')
