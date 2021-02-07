@@ -32,7 +32,7 @@ usage: alacritty-colorscheme [-c configuration file] [-C colorscheme directory] 
     # Get colorschemes 
     git clone $REPO $DEST
     # Create symlink at default colors location (optional)
-    ln -s "$DEST/colors" "$HOME/.config/alacritty/color"
+    ln -s "$DEST/colors" "$HOME/.config/alacritty/colors"
     ```
 
 - You can also get colorschemes from from [eendroroy/alacritty-theme](https://github.com/eendroroy/alacritty-theme)
@@ -43,7 +43,7 @@ usage: alacritty-colorscheme [-c configuration file] [-C colorscheme directory] 
     # Get colorschemes
     git clone $REPO $DEST
     # Create symlink at default colors location (optional)
-    ln -s "$DEST/themes" "$HOME/.config/alacritty/color"
+    ln -s "$DEST/themes" "$HOME/.config/alacritty/colors"
     ```
 
 ## Sync with vim/neo-vim
@@ -77,9 +77,9 @@ Add this in your `.zshrc` or `.bashrc` file:
 LIGHT_COLOR='base16-gruvbox-light-soft.yml'
 DARK_COLOR='base16-gruvbox-dark-soft.yml'
 
-alias day="alacritty-colorscheme -V apply $LIGHT_COLOR && reload_nvim"
-alias night="alacritty-colorscheme -V apply $DARK_COLOR && reload_nvim"
-alias toggle="alacritty-colorscheme -V toggle $LIGHT_COLOR $DARK_COLOR && reload_nvim"
+alias day="alacritty-colorscheme -V apply $LIGHT_COLOR"
+alias night="alacritty-colorscheme -V apply $DARK_COLOR"
+alias toggle="alacritty-colorscheme -V toggle $LIGHT_COLOR $DARK_COLOR"
 ```
 
 ### i3wm/sway bindings
