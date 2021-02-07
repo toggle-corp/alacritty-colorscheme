@@ -42,6 +42,7 @@ class ArgumentParser(Tap):
     config_file: str = config_path  # Path to alacritty configuration file
     colorscheme_dir: str = colorscheme_dir  # Path to colorscheme directory
     base16_vim: bool = False  # Support base16-vim. Generates .vimrc_background file at home directory
+    debug: bool = False  # Show more information
     # version: str  # Version
 
     def configure(self) -> None:
@@ -61,6 +62,9 @@ class ArgumentParser(Tap):
 
         self.add_argument('-V',
                           '--base16_vim')
+
+        self.add_argument('-d',
+                          '--debug')
 
         self.add_argument('-v',
                           '--version',
@@ -137,12 +141,12 @@ def main() -> None:
             else:
                 colors_path = join(args.colorscheme_dir, applicable_colorscheme)
                 replace_colorscheme(colors_path, args.config_file,
-                                    applicable_colorscheme, args.base16_vim)
+                                    applicable_colorscheme, args.base16_vim, args.debug)
     elif args._subparser_name == 'apply':
         applyArgs = cast(ApplyParser, args)
         colors_path = join(args.colorscheme_dir, applyArgs.colorscheme)
         replace_colorscheme(colors_path, args.config_file,
-                            applyArgs.colorscheme, args.base16_vim)
+                            applyArgs.colorscheme, args.base16_vim, args.debug)
     else:
         args.print_usage()
 
