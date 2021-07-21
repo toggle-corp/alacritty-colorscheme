@@ -1,4 +1,4 @@
-from os import listdir
+from os import listdir, environ
 from os.path import join
 from pynvim import attach
 
@@ -14,11 +14,13 @@ def template_vimrc_background(colorscheme: str) -> str:
 def _get_all_instances():
     instances = []
 
-    folders = [f for f in listdir('/tmp') if f.startswith('nvim')]
+    tmpdir = environ.get('TMPDIR','/tmp')
+
+    folders = [f for f in listdir(tmpdir) if f.startswith('nvim')]
     for folder in folders:
-        dc = listdir(join('/tmp', folder))
+        dc = listdir(join(tmpdir, folder))
         if '0' in dc:
-            instances.append(join('/tmp', folder, '0'))
+            instances.append(join(tmpdir, folder, '0'))
 
     return instances
 
