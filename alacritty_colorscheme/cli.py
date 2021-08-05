@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from tap import Tap
-from tempfile import NamedTemporaryFile
 from typing import List, Optional, Literal, cast
 from os import listdir
 from os.path import expanduser, isfile, join

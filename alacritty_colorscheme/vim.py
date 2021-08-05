@@ -14,7 +14,7 @@ def template_vimrc_background(colorscheme: str) -> str:
 def _get_all_instances():
     instances = []
 
-    tmpdir = environ.get('TMPDIR','/tmp')
+    tmpdir = environ.get('TMPDIR', '/tmp')
 
     folders = [f for f in listdir(tmpdir) if f.startswith('nvim')]
     for folder in folders:
