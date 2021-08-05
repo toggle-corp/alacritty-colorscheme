@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 
 from tap import Tap
-from typing import List, Optional, Literal, cast
 from os import listdir
 from os.path import expanduser, isfile, join
+from typing import List, Optional, cast
+try:
+    from typing import Literal  # type: ignore
+except ImportError:
+    from typing_extensions import Literal
 
 from . import __version__
 from .colorscheme import get_applied_colorscheme, get_applicable_colorscheme, replace_colorscheme
@@ -71,19 +75,18 @@ class ArgumentParser(Tap):
                           version='%(prog)s {version}'.format(version=__version__))
 
 
-# NOTE: adding '_subparser_naem' to ArgumentParser will add a new argument.
+# NOTE: adding '_subparser_name' to ArgumentParser will add a new argument.
 # So, creating this class for type casting purpose only
-class HackArgumentParser(ArgumentParser):
+class TypedArgumentParser(ArgumentParser):
     _subparser_name: Literal['list', 'status', 'toggle', 'apply']
 
 
-def parse_args() -> ArgumentParser:
+def create_parser() -> TypedArgumentParser:
     parser = ArgumentParser(
         "alacritty-colorscheme",
         description="Change colorscheme of alacritty with ease."
     )
-
-    return parser.parse_args()
+    return cast(TypedArgumentParser, parser)
 
 
 # TODO: show only yml files
@@ -97,9 +100,7 @@ def get_files_in_directory(path: str) -> Optional[List[str]]:
         return None
 
 
-def main() -> None:
-    args = cast(HackArgumentParser, parse_args())
-
+def main(args: TypedArgumentParser) -> None:
     if args._subparser_name == 'list':
         files = get_files_in_directory(args.colorscheme_dir)
         if files is None:
@@ -136,7 +137,7 @@ def main() -> None:
                 toggleArgs.reverse,
             )
             if applicable_colorscheme is None:
-                print('There is no applicable colorscheme')
+                print('Could not find an applicable colorscheme')
             else:
                 colors_path = join(args.colorscheme_dir, applicable_colorscheme)
                 replace_colorscheme(colors_path, args.config_file,
@@ -151,4 +152,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = create_parser()
+    args = parser.parse_args()
+    main(args)
