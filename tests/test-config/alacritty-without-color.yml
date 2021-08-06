@@ -1,0 +1,7 @@
+env:
+  TERM: xterm-256color
+
+background_opacity: 1.0
+
+debug:
+  render_timer: false

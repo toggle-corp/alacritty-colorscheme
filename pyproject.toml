@@ -25,12 +25,12 @@ python = "^3.6"
 "ruamel.yaml" = "^0.16.10"
 typed-argument-parser = "^1.6.3"
 pynvim = "^0.4.2"
-pyright = "^0.0.7"
-flake8 = "^3.9.2"
 typing-extensions = "^3.10.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
+pyright = "^0.0.7"
+flake8 = "^3.9.2"
 
 [tool.poetry.scripts]
 alacritty-colorscheme = 'alacritty_colorscheme.cli:main'

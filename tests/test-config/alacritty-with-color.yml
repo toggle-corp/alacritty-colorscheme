@@ -1,0 +1,50 @@
+env:
+  TERM: xterm-256color
+
+colors:
+  # COLORSCHEME: base16-horizon-light-256.yml
+  # Default colors
+  primary:
+    # hard contrast: background = '0x1d2021'
+    background: '0xfdf0ed'
+    foreground: '0x403c3d'
+
+  # Colors the cursor will use if `custom_cursor_colors` is true
+  cursor:
+    text: '0xfdf0ed'
+    cursor: '0x403c3d'
+
+  # Normal colors
+  normal:
+    black: '0xfdf0ed'
+    red: '0xf7939b'
+    green: '0x94e1b0'
+    yellow: '0xfbe0d9'
+    blue: '0xda103f'
+    magenta: '0x1d8991'
+    cyan: '0xdc3318'
+    white: '0x403c3d'
+
+  # Bright colors
+  bright:
+    black: '0xbdb3b1'
+    red: '0xf7939b'
+    green: '0x94e1b0'
+    yellow: '0xfbe0d9'
+    blue: '0xda103f'
+    magenta: '0x1d8991'
+    cyan: '0xdc3318'
+    white: '0x201c1d'
+
+  indexed_colors:
+    - {index: 16, color: '0xf6661e'}
+    - {index: 17, color: '0xe58c92'}
+    - {index: 18, color: '0xfadad1'}
+    - {index: 19, color: '0xf9cbbe'}
+    - {index: 20, color: '0x948c8a'}
+    - {index: 21, color: '0x302c2d'}
+
+background_opacity: 1.0
+
+debug:
+  render_timer: false

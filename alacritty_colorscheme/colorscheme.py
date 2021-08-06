@@ -28,7 +28,12 @@ def get_applied_colorscheme(config_path: str) -> Optional[str]:
     with open(expanduser(config_path), 'r') as config_file:
         config_yaml = yaml.load(config_file)
 
-    if not _has_comment_token(config_yaml['colors'].ca.comment):
+    try:
+        has_comment = _has_comment_token(config_yaml['colors'].ca.comment)
+    except KeyError:
+        return None
+
+    if not has_comment:
         return None
 
     comment_match = match(
