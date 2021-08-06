@@ -100,7 +100,7 @@ def get_files_in_directory(path: str) -> Optional[List[str]]:
         return None
 
 
-def main(args: TypedArgumentParser) -> None:
+def handle_args(args: TypedArgumentParser) -> None:
     if args._subparser_name == 'list':
         files = get_files_in_directory(args.colorscheme_dir)
         if files is None:
@@ -150,12 +150,16 @@ def main(args: TypedArgumentParser) -> None:
         args.print_usage()
 
 
-if __name__ == "__main__":
+def main() -> None:
     parser = create_parser()
     args = parser.parse_args()
 
     try:
-        main(args)
+        handle_args(args)
     except RuntimeError as e:
         print(e)
         exit(1)
+
+
+if __name__ == "__main__":
+    main()
