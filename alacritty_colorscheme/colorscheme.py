@@ -28,7 +28,12 @@ def get_applied_colorscheme(config_path: str) -> Optional[str]:
     with open(expanduser(config_path), 'r') as config_file:
         config_yaml = yaml.load(config_file)
 
-    if not _has_comment_token(config_yaml['colors'].ca.comment):
+    try:
+        has_comment = _has_comment_token(config_yaml['colors'].ca.comment)
+    except KeyError:
+        return None
+
+    if not has_comment:
         return None
 
     comment_match = match(
@@ -54,15 +59,13 @@ def replace_colorscheme(
         with open(expanduser(config_path), 'r') as config_file:
             config_yaml = yaml.load(config_file)
     except OSError:
-        print(f'Could not find a valid alacritty config file: {config_path}')
-        return
+        raise RuntimeError(f'Could not find a valid alacritty config file: {config_path}')
 
     try:
         with open(expanduser(colors_path), 'r') as color_file:
             colors_yaml = yaml.load(color_file)
     except OSError:
-        print(f'Could not find a valid alacritty colorscheme file: {colors_path}')
-        return
+        raise RuntimeError(f'Could not find a valid alacritty colorscheme file: {colors_path}')
 
     try:
         # NOTE: update method doesn't read the first comment
@@ -102,8 +105,7 @@ def replace_colorscheme(
             copyfile(tmp_file_path, expanduser(config_path))
             unlink(tmp_file_path)
     except OSError:
-        print(f'Could not modify alacritty config file: {config_path}')
-        return
+        raise RuntimeError(f'Could not modify alacritty config file: {config_path}')
 
     if debug:
         print(f'Applied colorscheme: {colorscheme}')
@@ -118,8 +120,7 @@ def replace_colorscheme(
                 )
                 vimrc_background_file.write(vimrc_background_content)
         except OSError:
-            print(f'Could not save file: {vimrc_background_path}')
-            return
+            raise RuntimeError(f'Could not save file: {vimrc_background_path}')
 
         reload_neovim_sessions(vimrc_background_path)
 

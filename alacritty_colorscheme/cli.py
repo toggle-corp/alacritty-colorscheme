@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
 from tap import Tap
-from tempfile import NamedTemporaryFile
-from typing import List, Optional, Literal, cast
 from os import listdir
 from os.path import expanduser, isfile, join
+from typing import List, Optional, cast
+try:
+    from typing import Literal  # type: ignore
+except ImportError:
+    from typing_extensions import Literal
 
 from . import __version__
 from .colorscheme import get_applied_colorscheme, get_applicable_colorscheme, replace_colorscheme
@@ -72,19 +75,18 @@ class ArgumentParser(Tap):
                           version='%(prog)s {version}'.format(version=__version__))
 
 
-# NOTE: adding '_subparser_naem' to ArgumentParser will add a new argument.
+# NOTE: adding '_subparser_name' to ArgumentParser will add a new argument.
 # So, creating this class for type casting purpose only
-class HackArgumentParser(ArgumentParser):
+class TypedArgumentParser(ArgumentParser):
     _subparser_name: Literal['list', 'status', 'toggle', 'apply']
 
 
-def parse_args() -> ArgumentParser:
+def create_parser() -> TypedArgumentParser:
     parser = ArgumentParser(
         "alacritty-colorscheme",
         description="Change colorscheme of alacritty with ease."
     )
-
-    return parser.parse_args()
+    return cast(TypedArgumentParser, parser)
 
 
 # TODO: show only yml files
@@ -98,16 +100,13 @@ def get_files_in_directory(path: str) -> Optional[List[str]]:
         return None
 
 
-def main() -> None:
-    args = cast(HackArgumentParser, parse_args())
-
+def handle_args(args: TypedArgumentParser) -> None:
     if args._subparser_name == 'list':
         files = get_files_in_directory(args.colorscheme_dir)
         if files is None:
-            print(f'Could not find directory: {args.colorscheme_dir}')
-        else:
-            for file in files:
-                print(file)
+            raise RuntimeError(f'Could not find directory: {args.colorscheme_dir}')
+        for file in files:
+            print(file)
     elif args._subparser_name == 'status':
         try:
             colorscheme = get_applied_colorscheme(args.config_file)
@@ -116,32 +115,32 @@ def main() -> None:
             else:
                 print(colorscheme)
         except OSError:
-            print(f'Could not find a valid alacritty config file: {args.config_file}')
+            raise RuntimeError(f'Could not find a valid alacritty config file: {args.config_file}')
     elif args._subparser_name == 'toggle':
         try:
             colorscheme = get_applied_colorscheme(args.config_file)
         except OSError:
-            print(f'Could not find a valid alacritty config file: {args.config_file}')
-            return
+            raise RuntimeError(f'Could not find a valid alacritty config file: {args.config_file}')
 
         toggleArgs = cast(ToggleParser, args)
         colorschemes = toggleArgs.colorschemes \
             if toggleArgs.colorschemes \
             else get_files_in_directory(args.colorscheme_dir)
+
         if colorschemes is None:
-            print(f'Could not find directory {args.colorscheme_dir}')
-        else:
-            applicable_colorscheme = get_applicable_colorscheme(
-                colorschemes,
-                colorscheme,
-                toggleArgs.reverse,
-            )
-            if applicable_colorscheme is None:
-                print('There is no applicable colorscheme')
-            else:
-                colors_path = join(args.colorscheme_dir, applicable_colorscheme)
-                replace_colorscheme(colors_path, args.config_file,
-                                    applicable_colorscheme, args.base16_vim, args.debug)
+            raise RuntimeError(f'Could not find directory {args.colorscheme_dir}')
+
+        applicable_colorscheme = get_applicable_colorscheme(
+            colorschemes,
+            colorscheme,
+            toggleArgs.reverse,
+        )
+        if applicable_colorscheme is None:
+            raise RuntimeError('Could not find an applicable colorscheme')
+
+        colors_path = join(args.colorscheme_dir, applicable_colorscheme)
+        replace_colorscheme(colors_path, args.config_file,
+                            applicable_colorscheme, args.base16_vim, args.debug)
     elif args._subparser_name == 'apply':
         applyArgs = cast(ApplyParser, args)
         colors_path = join(args.colorscheme_dir, applyArgs.colorscheme)
@@ -149,6 +148,17 @@ def main() -> None:
                             applyArgs.colorscheme, args.base16_vim, args.debug)
     else:
         args.print_usage()
+
+
+def main() -> None:
+    parser = create_parser()
+    args = parser.parse_args()
+
+    try:
+        handle_args(args)
+    except RuntimeError as e:
+        print(e)
+        exit(1)
 
 
 if __name__ == "__main__":
