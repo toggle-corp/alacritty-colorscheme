@@ -72,6 +72,11 @@ def replace_colorscheme(
         config_yaml['colors'].update(colors_yaml['colors'])
     except KeyError:
         config_yaml['colors'] = colors_yaml['colors']
+    except TypeError:
+        if not config_yaml:
+            config_yaml = {'colors': colors_yaml['colors']}
+        else:
+            raise
 
     new_comment_token = CommentToken(
         f'# COLORSCHEME: {colorscheme}\n',
