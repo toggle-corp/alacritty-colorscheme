@@ -103,7 +103,7 @@ def replace_colorscheme(
             tmp_file_path = tmp_file.name
             yaml.dump(config_yaml, tmp_file)
             copyfile(tmp_file_path, expanduser(config_path))
-            unlink(tmp_file_path)
+        unlink(tmp_file_path)
     except OSError:
         raise RuntimeError(f'Could not modify alacritty config file: {config_path}')
 
