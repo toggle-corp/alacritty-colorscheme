@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
+import os
+
 from tap import Tap
-from os import listdir
 from os.path import expanduser, isfile, join
 from typing import List, Optional, cast
 try:
@@ -89,13 +90,17 @@ def create_parser() -> TypedArgumentParser:
     return cast(TypedArgumentParser, parser)
 
 
-# TODO: show only yml files
 def get_files_in_directory(path: str) -> Optional[List[str]]:
     expanded_path = expanduser(path)
     try:
-        onlyfiles = [f for f in listdir(expanded_path)
-                     if isfile(join(expanded_path, f))]
-        return sorted(onlyfiles)
+        onlyfiles = []
+        for root, _dirs, files in os.walk(expanded_path, followlinks=True):
+            for file in files:
+                full_path = join(root, file)
+                if file.endswith(('.yml', '.yaml')) and isfile(full_path):
+                    onlyfiles.append(full_path.removeprefix(expanded_path))
+        onlyfiles.sort()
+        return onlyfiles
     except OSError:
         return None
 
