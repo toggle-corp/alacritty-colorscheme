@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-import os
-
 from tap import Tap
-from os.path import expanduser, isfile, join
+from os import walk
+from os.path import expanduser, isfile, isdir, join
 from typing import List, Optional, cast
 try:
     from typing import Literal  # type: ignore
@@ -92,15 +91,18 @@ def create_parser() -> TypedArgumentParser:
 
 def get_files_in_directory(path: str) -> Optional[List[str]]:
     expanded_path = expanduser(path)
+    if not isdir(expanded_path):
+        return None
     try:
-        onlyfiles = []
-        for root, _dirs, files in os.walk(expanded_path, followlinks=True):
-            for file in files:
-                full_path = join(root, file)
-                if file.endswith(('.yml', '.yaml')) and isfile(full_path):
-                    onlyfiles.append(full_path.removeprefix(expanded_path))
-        onlyfiles.sort()
-        return onlyfiles
+        files = [join(root, file)
+                 for (root, __dirs, files) in walk(expanded_path, followlinks=True)
+                 for file in files]
+        # NOTE: joining path with empty string to add a trailing slash to dir
+        onlyfiles = [file.removeprefix(join(expanded_path, ''))
+                     for file in files
+                     if isfile(file) and file.lower().endswith(('.yml', '.yaml'))]
+        sortedfiles = sorted(onlyfiles)
+        return sortedfiles
     except OSError:
         return None
 
@@ -109,7 +111,7 @@ def handle_args(args: TypedArgumentParser) -> None:
     if args._subparser_name == 'list':
         files = get_files_in_directory(args.colorscheme_dir)
         if files is None:
-            raise RuntimeError(f'Could not find directory: {args.colorscheme_dir}')
+            raise RuntimeError(f'Could not find colorscheme directory: {args.colorscheme_dir}')
         for file in files:
             print(file)
     elif args._subparser_name == 'status':
