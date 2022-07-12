@@ -46,6 +46,16 @@ usage: alacritty-colorscheme [-c configuration file] [-C colorscheme directory] 
     ln -s "$DEST/themes" "$HOME/.config/alacritty/colors"
     ```
 
+- To quickly choose and change the colorscheme, you can combine the `alacritty-colorscheme` command with `fd` and `fzf`. Put the function below into your `$HOME/.bashrc` or `$HOME/.zshrc`
+    ```bash
+    # ALACRITTY colorscheme changer
+    function set_colorscheme() {
+      ALACRITTY_DIR=$HOME/.config/alacritty 
+      alacritty-colorscheme -V -c $ALACRITTY_DIR/alacritty.yml apply $(fd . "$ALACRITTY_DIR/colors/themes" --type file --extension yaml --extension yml | fzf)
+    }
+    ```
+Just make sure you have [`fd`](https://github.com/sharkdp/fd) and [`fzf`](https://github.com/junegunn/fzf).
+
 ## Sync with vim/neo-vim
 
 If you are using base16 colorschemes from
