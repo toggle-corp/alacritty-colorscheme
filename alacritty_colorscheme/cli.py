@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 from tap import Tap
-from os import walk
-from os.path import expanduser, isfile, isdir, join
+from pathlib import Path
+from os.path import expanduser, isdir, join
 from typing import List, Optional, cast
 try:
     from typing import Literal  # type: ignore
@@ -94,13 +94,9 @@ def get_files_in_directory(path: str) -> Optional[List[str]]:
     if not isdir(expanded_path):
         return None
     try:
-        files = [join(root, file)
-                 for (root, __dirs, files) in walk(expanded_path, followlinks=True)
-                 for file in files]
         # NOTE: joining path with empty string to add a trailing slash to dir
-        onlyfiles = [file.removeprefix(join(expanded_path, ''))
-                     for file in files
-                     if isfile(file) and file.lower().endswith(('.yml', '.yaml'))]
+        onlyfiles = [str(x).removeprefix(join(expanded_path, ''))
+                     for x in list(Path(expanded_path).rglob("*.yml"))]
         sortedfiles = sorted(onlyfiles)
         return sortedfiles
     except OSError:
