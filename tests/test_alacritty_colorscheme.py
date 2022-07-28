@@ -37,14 +37,14 @@ def test_list_existing(tmpdir):
 def test_list_no_colorscheme():
     with raises(RuntimeError):
         parser = create_parser()
-        args = parser.parse_args(['--colorscheme_dir', 'this-dir-does-not-exist', 'list'])
+        args = parser.parse_args(['--colorscheme_dir', 'this-dir-does-not-exist/', 'list'])
         handle_args(args)
 
 
 def test_status_no_config():
     with raises(RuntimeError):
         parser = create_parser()
-        args = parser.parse_args(['--config_file', 'this-config-does-not-exist', 'status'])
+        args = parser.parse_args(['--config_file', 'this-config-does-not-exist/', 'status'])
         handle_args(args)
 
 
@@ -60,11 +60,17 @@ def test_status_with_config_without_colors():
     handle_args(args)
 
 
+def test_status_with_empty_config():
+    parser = create_parser()
+    args = parser.parse_args(['--config_file', './tests/test-config/alacritty-empty.yml', 'status'])
+    handle_args(args)
+
+
 def test_apply_with_config(test_config_path):
     parser = create_parser()
     args = parser.parse_args([
         '--config_file', path.join(test_config_path, 'alacritty-with-color.yml'),
-        '--colorscheme_dir', path.join(test_config_path, 'colors'),
+        '--colorscheme_dir', path.join(test_config_path, 'colors/'),
         'apply', 'base16-zenburn.yml',
     ])
     handle_args(args)
@@ -75,17 +81,27 @@ def test_apply_with_bad_color_option(test_config_path):
         parser = create_parser()
         args = parser.parse_args([
             '--config_file', path.join(test_config_path, 'alacritty-with-color.yml'),
-            '--colorscheme_dir', path.join(test_config_path, 'colors'),
+            '--colorscheme_dir', path.join(test_config_path, 'colors/'),
             'apply', 'base16-zenbum.yml',
         ])
         handle_args(args)
 
 
+def test_apply_with_config_empty(test_config_path):
+    parser = create_parser()
+    args = parser.parse_args([
+        '--config_file', path.join(test_config_path, 'alacritty-empty.yml'),
+        '--colorscheme_dir', path.join(test_config_path, 'colors/'),
+        'apply', 'base16-zenburn.yml',
+    ])
+    handle_args(args)
+
+
 def test_apply_with_config_without_color(test_config_path):
     parser = create_parser()
     args = parser.parse_args([
-        '--config_file', path.join(test_config_path, 'alacritty-with-color.yml'),
-        '--colorscheme_dir', path.join(test_config_path, 'colors'),
+        '--config_file', path.join(test_config_path, 'alacritty-without-color.yml'),
+        '--colorscheme_dir', path.join(test_config_path, 'colors/'),
         'apply', 'base16-zenburn.yml',
     ])
     handle_args(args)
@@ -95,7 +111,7 @@ def test_toggle(test_config_path):
     parser = create_parser()
     args = parser.parse_args([
         '--config_file', path.join(test_config_path, 'alacritty-with-color.yml'),
-        '--colorscheme_dir', path.join(test_config_path, 'colors'),
+        '--colorscheme_dir', path.join(test_config_path, 'colors/'),
         'toggle'
     ])
     handle_args(args)
@@ -105,7 +121,7 @@ def test_toggle_in_list(test_config_path):
     parser = create_parser()
     args = parser.parse_args([
         '--config_file', path.join(test_config_path, 'alacritty-without-color.yml'),
-        '--colorscheme_dir', path.join(test_config_path, 'colors'),
+        '--colorscheme_dir', path.join(test_config_path, 'colors/'),
         'toggle',
         'base16-spacemacs.yml',
         'base16-zenburn.yml',

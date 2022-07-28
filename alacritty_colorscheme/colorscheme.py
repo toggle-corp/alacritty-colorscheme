@@ -32,6 +32,8 @@ def get_applied_colorscheme(config_path: str) -> Optional[str]:
         has_comment = _has_comment_token(config_yaml['colors'].ca.comment)
     except KeyError:
         return None
+    except TypeError:
+        return None
 
     if not has_comment:
         return None
@@ -70,13 +72,13 @@ def replace_colorscheme(
     try:
         # NOTE: update method doesn't read the first comment
         config_yaml['colors'].update(colors_yaml['colors'])
+    # NOTE: We get a KeyError when accessing colors if colors does not exist
     except KeyError:
         config_yaml['colors'] = colors_yaml['colors']
+    # NOTE: config_yaml is None when config_file is an empty yml file
+    # We get a TypeError when accessing colors from None
     except TypeError:
-        if not config_yaml:
-            config_yaml = {'colors': colors_yaml['colors']}
-        else:
-            raise
+        config_yaml = {'colors': colors_yaml['colors']}
 
     new_comment_token = CommentToken(
         f'# COLORSCHEME: {colorscheme}\n',

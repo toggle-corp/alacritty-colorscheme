@@ -29,8 +29,15 @@ usage: alacritty-colorscheme [-c configuration file] [-C colorscheme directory] 
     REPO="https://github.com/aaron-williamson/base16-alacritty.git"
     DEST="$HOME/.aarors-williamson-colorschemes"
 
-    # Get colorschemes 
+    # Get colorschemes
     git clone $REPO $DEST
+
+    # Make sure the config directory exits
+    mkdir "$HOME/.config/alacritty/" -p
+
+    # Make sure the config file exists
+    touch -a "$HOME/.config/alacritty/alacritty.yml"
+
     # Create symlink at default colors location (optional)
     ln -s "$DEST/colors" "$HOME/.config/alacritty/colors"
     ```
@@ -40,8 +47,16 @@ usage: alacritty-colorscheme [-c configuration file] [-C colorscheme directory] 
     ```bash
     REPO=https://github.com/eendroroy/alacritty-theme.git
     DEST="$HOME/.eendroroy-colorschemes"
+
+    # Make sure the config directory exits
+    mkdir "$HOME/.config/alacritty/" -p
+
+    # Make sure the config file exists
+    touch -a "$HOME/.config/alacritty/alacritty.yml"
+
     # Get colorschemes
     git clone $REPO $DEST
+
     # Create symlink at default colors location (optional)
     ln -s "$DEST/themes" "$HOME/.config/alacritty/colors"
     ```
