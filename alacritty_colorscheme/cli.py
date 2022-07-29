@@ -98,7 +98,9 @@ def get_files_in_directory(path: str) -> Optional[List[str]]:
             for file in files:
                 full_path = join(root, file)
                 if file.endswith(('.yml', '.yaml')) and isfile(full_path):
-                    onlyfiles.append(full_path.removeprefix(expanded_path))
+                    # NOTE: use str.removeprefix in Python >= 3.9
+                    filename = full_path[len(expanded_path):]
+                    onlyfiles.append(filename)
         onlyfiles.sort()
         return onlyfiles
     except OSError:
