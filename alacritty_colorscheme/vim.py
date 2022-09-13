@@ -4,6 +4,7 @@ from pynvim import attach
 
 
 def template_vimrc_background(colorscheme: str) -> str:
+    colorscheme.strip("-256")
     command = (
         f"if !exists('g:colors_name') || g:colors_name != '{colorscheme}'\n"
         f"  colorscheme {colorscheme}\n"
