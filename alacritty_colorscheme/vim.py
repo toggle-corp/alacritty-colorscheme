@@ -1,5 +1,5 @@
 from os import listdir, environ
-from os.path import join
+from os.path import join, isdir
 from pynvim import attach
 
 
@@ -16,11 +16,15 @@ def _get_all_instances():
 
     tmpdir = environ.get('TMPDIR', '/tmp')
 
-    folders = [f for f in listdir(tmpdir) if f.startswith('nvim')]
+    folders = [f for f in listdir(tmpdir) if f.startswith('nvim') and isdir(f)]
     for folder in folders:
-        dc = listdir(join(tmpdir, folder))
-        if '0' in dc:
-            instances.append(join(tmpdir, folder, '0'))
+        try:
+            dc = listdir(join(tmpdir, folder))
+            if '0' in dc:
+                instances.append(join(tmpdir, folder, '0'))
+        except PermissionError:
+            # cannot open directories owned by other users e.g., /tmp/nvim.root
+            continue
 
     return instances
 
