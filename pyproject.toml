@@ -36,5 +36,5 @@ flake8 = "^3.9.2"
 alacritty-colorscheme = 'alacritty_colorscheme.cli:main'
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
