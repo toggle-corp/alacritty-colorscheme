@@ -27,9 +27,9 @@ typed-argument-parser = "^1.6.3"
 pynvim = "^0.4.2"
 typing-extensions = "^3.10.0"
 tomlkit = "^0.12.3"
+pytest = "^7.4.4"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
 pyright = "^0.0.7"
 flake8 = "^3.9.2"
 

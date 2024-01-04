@@ -11,7 +11,7 @@ except ImportError:
     from typing_extensions import Literal
 
 from . import __version__
-from .colorscheme import get_applied_colorscheme, get_applicable_colorscheme, replace_colorscheme
+from .colorscheme_yaml import get_applied_colorscheme, get_applicable_colorscheme, replace_colorscheme
 
 
 class StatusParser(Tap):
