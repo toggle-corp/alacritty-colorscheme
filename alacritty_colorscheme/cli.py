@@ -194,7 +194,7 @@ def handle_args(args: TypedArgumentParser) -> None:
             # Assume we were just given a color scheme name, no file extension.
             # Try to find one that exists.
             options = list(
-                filter(os.path.exists, [colors_path + end for end in file_ends])
+                filter(os.path.exists, [colors_path + end for end in CONF_FILE_ENDINGS])
             )
             if len(options) == 0:
                 raise RuntimeError(
