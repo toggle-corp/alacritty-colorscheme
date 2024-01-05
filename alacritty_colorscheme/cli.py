@@ -2,16 +2,43 @@
 
 import os
 
+from enum import Enum, auto
 from tap import Tap
 from os.path import expanduser, isfile, join
 from typing import List, Optional, cast
+
 try:
     from typing import Literal  # type: ignore
 except ImportError:
     from typing_extensions import Literal
 
 from . import __version__
-from .colorscheme_yaml import get_applied_colorscheme, get_applicable_colorscheme, replace_colorscheme
+from .colorscheme_yaml import (
+    get_applied_colorscheme,
+    get_applicable_colorscheme,
+    replace_colorscheme,
+)
+from .colorscheme_toml import TomlManager
+
+
+# The list of recognized file endings for configuration and color files.
+CONF_FILE_ENDINGS = (".toml", ".yml", ".yaml")
+
+
+class ConfigType(Enum):
+    YAML_CONFIG = auto()
+    TOML_CONFIG = auto()
+
+
+def get_config_type(config_file: str) -> ConfigType:
+    if config_file.endswith(("yaml", "yml")):
+        return ConfigType.YAML_CONFIG
+    elif config_file.endswith("toml"):
+        return ConfigType.TOML_CONFIG
+    else:
+        raise RuntimeError(
+            f"Unknown config type, please check file ending of {config_file=}"
+        )
 
 
 class StatusParser(Tap):
@@ -27,7 +54,7 @@ class ApplyParser(Tap):
     colorscheme: str
 
     def configure(self) -> None:
-        self.add_argument('colorscheme')
+        self.add_argument("colorscheme")
 
 
 class ToggleParser(Tap):
@@ -35,57 +62,55 @@ class ToggleParser(Tap):
     reverse: bool = False
 
     def configure(self) -> None:
-        self.add_argument('colorschemes')
+        self.add_argument("colorschemes")
 
 
-config_path = join('~', '.config/alacritty/alacritty.yml')
-colorscheme_dir = join('~', '.config/alacritty/colors/')
+config_path = join("~", ".config/alacritty/alacritty.yml")
+colorscheme_dir = join("~", ".config/alacritty/colors/")
 
 
 class ArgumentParser(Tap):
     config_file: str = config_path  # Path to alacritty configuration file
     colorscheme_dir: str = colorscheme_dir  # Path to colorscheme directory
-    base16_vim: bool = False  # Support base16-vim. Generates .vimrc_background file at home directory
+    base16_vim: bool = (
+        False  # Support base16-vim. Generates .vimrc_background file at home directory
+    )
     debug: bool = False  # Show more information
     # version: str  # Version
 
     def configure(self) -> None:
-        self.add_subparsers(help='sub-command help', dest="_subparser_name")
-        self.add_subparser('list', ListParser, help='List available colorschemes')
-        self.add_subparser('status', StatusParser, help='Show current colorscheme')
-        self.add_subparser('toggle', ToggleParser, help='Toggle colorscheme')
-        self.add_subparser('apply', ApplyParser, help='Apply colorscheme')
+        self.add_subparsers(help="sub-command help", dest="_subparser_name")
+        self.add_subparser("list", ListParser, help="List available colorschemes")
+        self.add_subparser("status", StatusParser, help="Show current colorscheme")
+        self.add_subparser("toggle", ToggleParser, help="Toggle colorscheme")
+        self.add_subparser("apply", ApplyParser, help="Apply colorscheme")
 
-        self.add_argument('-c',
-                          '--config_file',
-                          metavar='configuration file')
+        self.add_argument("-c", "--config_file", metavar="configuration file")
 
-        self.add_argument('-C',
-                          '--colorscheme_dir',
-                          metavar='colorscheme directory')
+        self.add_argument("-C", "--colorscheme_dir", metavar="colorscheme directory")
 
-        self.add_argument('-V',
-                          '--base16_vim')
+        self.add_argument("-V", "--base16_vim")
 
-        self.add_argument('-d',
-                          '--debug')
+        self.add_argument("-d", "--debug")
 
-        self.add_argument('-v',
-                          '--version',
-                          action='version',
-                          version='%(prog)s {version}'.format(version=__version__))
+        self.add_argument(
+            "-v",
+            "--version",
+            action="version",
+            version="%(prog)s {version}".format(version=__version__),
+        )
 
 
 # NOTE: adding '_subparser_name' to ArgumentParser will add a new argument.
 # So, creating this class for type casting purpose only
 class TypedArgumentParser(ArgumentParser):
-    _subparser_name: Literal['list', 'status', 'toggle', 'apply']
+    _subparser_name: Literal["list", "status", "toggle", "apply"]
 
 
 def create_parser() -> TypedArgumentParser:
     parser = ArgumentParser(
         "alacritty-colorscheme",
-        description="Change colorscheme of alacritty with ease."
+        description="Change colorscheme of alacritty with ease.",
     )
     return cast(TypedArgumentParser, parser)
 
@@ -93,13 +118,15 @@ def create_parser() -> TypedArgumentParser:
 def get_files_in_directory(path: str) -> Optional[List[str]]:
     expanded_path = expanduser(path)
     if not os.path.isdir(expanded_path):
-        raise RuntimeError(f"Directory {expanded_path=} does not exist or is not a directory.")
+        raise RuntimeError(
+            f"Directory {expanded_path=} does not exist or is not a directory."
+        )
     try:
         onlyfiles = []
         for root, _dirs, files in os.walk(expanded_path, followlinks=True):
             for file in files:
                 full_path = join(root, file)
-                if file.endswith(('.yml', '.yaml')) and isfile(full_path):
+                if file.endswith(CONF_FILE_ENDINGS) and isfile(full_path):
                     onlyfiles.append(full_path.removeprefix(expanded_path))
         onlyfiles.sort()
         return onlyfiles
@@ -108,34 +135,40 @@ def get_files_in_directory(path: str) -> Optional[List[str]]:
 
 
 def handle_args(args: TypedArgumentParser) -> None:
-    if args._subparser_name == 'list':
+    if args._subparser_name == "list":
         files = get_files_in_directory(args.colorscheme_dir)
         if files is None:
-            raise RuntimeError(f'Could not find directory: {args.colorscheme_dir}')
+            raise RuntimeError(f"Could not find directory: {args.colorscheme_dir}")
         for file in files:
             print(file)
-    elif args._subparser_name == 'status':
+    elif args._subparser_name == "status":
         try:
             colorscheme = get_applied_colorscheme(args.config_file)
             if colorscheme is None:
-                print('No colorscheme is applied')
+                print("No colorscheme is applied")
             else:
                 print(colorscheme)
         except OSError:
-            raise RuntimeError(f'Could not find a valid alacritty config file: {args.config_file}')
-    elif args._subparser_name == 'toggle':
+            raise RuntimeError(
+                f"Could not find a valid alacritty config file: {args.config_file}"
+            )
+    elif args._subparser_name == "toggle":
         try:
             colorscheme = get_applied_colorscheme(args.config_file)
         except OSError:
-            raise RuntimeError(f'Could not find a valid alacritty config file: {args.config_file}')
+            raise RuntimeError(
+                f"Could not find a valid alacritty config file: {args.config_file}"
+            )
 
         toggleArgs = cast(ToggleParser, args)
-        colorschemes = toggleArgs.colorschemes \
-            if toggleArgs.colorschemes \
+        colorschemes = (
+            toggleArgs.colorschemes
+            if toggleArgs.colorschemes
             else get_files_in_directory(args.colorscheme_dir)
+        )
 
         if colorschemes is None:
-            raise RuntimeError(f'Could not find directory {args.colorscheme_dir}')
+            raise RuntimeError(f"Could not find directory {args.colorscheme_dir}")
 
         applicable_colorscheme = get_applicable_colorscheme(
             colorschemes,
@@ -143,16 +176,56 @@ def handle_args(args: TypedArgumentParser) -> None:
             toggleArgs.reverse,
         )
         if applicable_colorscheme is None:
-            raise RuntimeError('Could not find an applicable colorscheme')
+            raise RuntimeError("Could not find an applicable colorscheme")
 
-        colors_path = join(args.colorscheme_dir, applicable_colorscheme.lstrip('/'))
-        replace_colorscheme(colors_path, args.config_file,
-                            applicable_colorscheme, args.base16_vim, args.debug)
-    elif args._subparser_name == 'apply':
+        colors_path = join(args.colorscheme_dir, applicable_colorscheme.lstrip("/"))
+        replace_colorscheme(
+            colors_path,
+            args.config_file,
+            applicable_colorscheme,
+            args.base16_vim,
+            args.debug,
+        )
+    elif args._subparser_name == "apply":
         applyArgs = cast(ApplyParser, args)
-        colors_path = join(args.colorscheme_dir, applyArgs.colorscheme)
-        replace_colorscheme(colors_path, args.config_file,
-                            applyArgs.colorscheme, args.base16_vim, args.debug)
+        colors_path = join(args.colorscheme_dir, applyArgs.colorscheme.lstrip("/"))
+
+        if not colors_path.endswith(CONF_FILE_ENDINGS):
+            # Assume we were just given a color scheme name, no file extension.
+            # Try to find one that exists.
+            options = list(
+                filter(os.path.exists, [colors_path + end for end in file_ends])
+            )
+            if len(options) == 0:
+                raise RuntimeError(
+                    f"Cannot find theme {applyArgs.colorscheme.lstrip('/')}"
+                    + f" under '{args.colorscheme_dir}'."
+                )
+            colors_path = list(options)[0]
+
+        # Apply the color scheme appropriate to the configuration file type.
+        match get_config_type(args.config_file):
+            case ConfigType.TOML_CONFIG:
+                # New TOML configs.
+
+                if colors_path.endswith(("yml", "yaml")):
+                    raise RuntimeError(
+                        f"Attempted to apply a YAML color scheme '{colors_path}'" +
+                        f" to a TOML configuration file '{args.config_file}'."
+                    )
+
+                TomlManager.replace_colorscheme_at(args.config_file, colors_path)
+
+            case ConfigType.YAML_CONFIG:
+                # Old YAML configs.
+
+                replace_colorscheme(
+                    colors_path,
+                    args.config_file,
+                    applyArgs.colorscheme,
+                    args.base16_vim,
+                    args.debug,
+                )
     else:
         args.print_usage()
 

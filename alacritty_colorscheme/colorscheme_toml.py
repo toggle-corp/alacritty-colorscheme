@@ -40,24 +40,29 @@ def load_toml_config_from(path: str) -> tomlkit.TOMLDocument:
         raise RuntimeError(msg) from exc
 
 
-def replace_colorscheme_at(
-    config_path: str,
-    colors_path: str,
-    behaviour: OverwriteBehaviour = OverwriteBehaviour.REPLACE,
-) -> None:
-    """Update the configuration at `config_path` with the TOML colors file at `colors_path`."""
-    config_path = expanduser(config_path)
-    colors_path = expanduser(colors_path)
+class TomlManager:
+    @staticmethod
+    def replace_colorscheme_at(
+        config_path: str,
+        colors_path: str,
+        behaviour: OverwriteBehaviour = OverwriteBehaviour.REPLACE,
+    ) -> None:
+        """Update the configuration at `config_path` with the TOML colors file at `colors_path`."""
+        config_path = expanduser(config_path)
+        colors_path = expanduser(colors_path)
 
-    config = load_toml_config_from(config_path)
-    colors = load_toml_config_from(colors_path)
+        config = load_toml_config_from(config_path)
+        colors = load_toml_config_from(colors_path)
 
-    update_colors_in_config_dict(config, colors, behaviour=behaviour)
+        update_colors_in_config_dict(config, colors, behaviour=behaviour)
 
-    # Write to a temporary file and replace the config.
-    with NamedTemporaryFile(encoding='utf-8', mode='w+') as tmp_file:
-        tomlkit.dump(config, tmp_file)
-        # TODO(akiss-xyz, 2024-01-03): Is this flush really required?
-        # Didn't seem to work for me without it...
-        tmp_file.flush()
-        copyfile(tmp_file.name, config_path)
+        # Write to a temporary file and replace the config.
+        with NamedTemporaryFile(encoding="utf-8", mode="w+") as tmp_file:
+            tomlkit.dump(config, tmp_file)
+            # TODO(akiss-xyz, 2024-01-03): Is this flush really required?
+            # Didn't seem to work for me without it...
+            tmp_file.flush()
+            copyfile(tmp_file.name, config_path)
+
+
+replace_colorscheme_at = TomlManager.replace_colorscheme_at

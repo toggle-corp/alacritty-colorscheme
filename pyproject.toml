@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "alacritty-colorscheme"
-version = "1.0.1"
+version = "1.0.2"
 description = "Change colorscheme of alacritty with ease"
 license="Apache-2.0"
 authors = ["Safar Ligal <weathermist@gmail.com>"]
