@@ -92,6 +92,8 @@ def create_parser() -> TypedArgumentParser:
 
 def get_files_in_directory(path: str) -> Optional[List[str]]:
     expanded_path = expanduser(path)
+    if not os.path.isdir(expanded_path):
+        raise RuntimeError(f"Directory {expanded_path=} does not exist or is not a directory.")
     try:
         onlyfiles = []
         for root, _dirs, files in os.walk(expanded_path, followlinks=True):
@@ -143,7 +145,7 @@ def handle_args(args: TypedArgumentParser) -> None:
         if applicable_colorscheme is None:
             raise RuntimeError('Could not find an applicable colorscheme')
 
-        colors_path = join(args.colorscheme_dir, applicable_colorscheme)
+        colors_path = join(args.colorscheme_dir, applicable_colorscheme.lstrip('/'))
         replace_colorscheme(colors_path, args.config_file,
                             applicable_colorscheme, args.base16_vim, args.debug)
     elif args._subparser_name == 'apply':
