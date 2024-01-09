@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "alacritty-colorscheme"
-version = "1.0.1"
+version = "1.0.2"
 description = "Change colorscheme of alacritty with ease"
 license="Apache-2.0"
 authors = ["Safar Ligal <weathermist@gmail.com>"]
@@ -21,14 +21,15 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.11"
 "ruamel.yaml" = "^0.16.10"
 typed-argument-parser = "^1.6.3"
 pynvim = "^0.4.2"
 typing-extensions = "^3.10.0"
+tomlkit = "^0.12.3"
+pytest = "^7.4.4"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
 pyright = "^0.0.7"
 flake8 = "^3.9.2"
 
