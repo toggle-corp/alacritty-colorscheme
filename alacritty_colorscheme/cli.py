@@ -23,6 +23,13 @@ from .colorscheme_toml import TomlManager
 
 # The list of recognized file endings for configuration and color files.
 CONF_FILE_ENDINGS = (".toml", ".yml", ".yaml")
+# The default configuration file path, in priority order.
+DEFAULT_CONFIG_PATH_OPTIONS: List[str] = [
+    expanduser(join("~", ".config/alacritty/alacritty.toml")),
+    expanduser(join("~", ".config/alacritty/alacritty.yml")),
+]
+# The default directory to search colorschemes for.
+DEFAULT_COLORSCHEME_DIR = join("~", ".config/alacritty/colors/")
 
 
 class ConfigType(Enum):
@@ -65,13 +72,10 @@ class ToggleParser(Tap):
         self.add_argument("colorschemes")
 
 
-config_path = join("~", ".config/alacritty/alacritty.yml")
-colorscheme_dir = join("~", ".config/alacritty/colors/")
-
-
 class ArgumentParser(Tap):
-    config_file: str = config_path  # Path to alacritty configuration file
-    colorscheme_dir: str = colorscheme_dir  # Path to colorscheme directory
+    # config_file: str = config_path  # Path to alacritty configuration file
+    config_file: str
+    colorscheme_dir: str = DEFAULT_COLORSCHEME_DIR  # Path to colorscheme directory
     base16_vim: bool = (
         False  # Support base16-vim. Generates .vimrc_background file at home directory
     )
@@ -85,7 +89,9 @@ class ArgumentParser(Tap):
         self.add_subparser("toggle", ToggleParser, help="Toggle colorscheme")
         self.add_subparser("apply", ApplyParser, help="Apply colorscheme")
 
-        self.add_argument("-c", "--config_file", metavar="configuration file")
+        self.add_argument(
+            "-c", "--config_file", metavar="configuration file", default=None
+        )
 
         self.add_argument("-C", "--colorscheme_dir", metavar="colorscheme directory")
 
@@ -99,6 +105,27 @@ class ArgumentParser(Tap):
             action="version",
             version="%(prog)s {version}".format(version=__version__),
         )
+
+    def _get_config_file(self) -> str:
+        """Get the path to the config file to be used."""
+        if self.config_file is None:
+            # Default to the best option in DEFAULT_CONFIG_PATH_OPTIONS.
+            options = list(filter(os.path.exists, DEFAULT_CONFIG_PATH_OPTIONS))
+            if len(options) == 0:
+                msg = (
+                    "No config file could be found! We tried the following:\n"
+                    + f"{DEFAULT_CONFIG_PATH_OPTIONS}\n"
+                    + "Place your configuration file at one of those locations, "
+                    + "or specify a different one with --config_file <file>."
+                )
+                raise RuntimeError(msg)
+
+            return options[0]
+
+        return self.config_file
+
+    def process_args(self):
+        self.config_file = self._get_config_file()
 
 
 # NOTE: adding '_subparser_name' to ArgumentParser will add a new argument.
@@ -188,7 +215,9 @@ def handle_args(args: TypedArgumentParser) -> None:
         )
     elif args._subparser_name == "apply":
         applyArgs = cast(ApplyParser, args)
-        colors_path = join(args.colorscheme_dir, applyArgs.colorscheme.lstrip("/"))
+        colors_path = expanduser(
+            join(args.colorscheme_dir, applyArgs.colorscheme.lstrip("/"))
+        )
 
         if not colors_path.endswith(CONF_FILE_ENDINGS):
             # Assume we were just given a color scheme name, no file extension.
@@ -210,14 +239,20 @@ def handle_args(args: TypedArgumentParser) -> None:
 
                 if colors_path.endswith(("yml", "yaml")):
                     raise RuntimeError(
-                        f"Attempted to apply a YAML color scheme '{colors_path}'" +
-                        f" to a TOML configuration file '{args.config_file}'."
+                        f"Attempted to apply a YAML color scheme '{colors_path}'"
+                        + f" to a TOML configuration file '{args.config_file}'."
                     )
 
                 TomlManager.replace_colorscheme_at(args.config_file, colors_path)
 
             case ConfigType.YAML_CONFIG:
                 # Old YAML configs.
+
+                if colors_path.endswith("toml"):
+                    raise RuntimeError(
+                        f"Attempted to apply a TOML color scheme '{colors_path}'"
+                        + f" to a YAML configuration file '{args.config_file}'."
+                    )
 
                 replace_colorscheme(
                     colors_path,

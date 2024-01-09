@@ -11,11 +11,11 @@ from ruamel.yaml import YAML
 yaml = YAML()
 
 
-def load_yaml_colorscheme_from(yaml_path: str) -> YAML:
-    """Load the YAML colorscheme from the file at `yaml_path`."""
+def load_yaml_file_from(yaml_path: str) -> YAML:
+    """Load the YAML file from the file at `yaml_path`."""
     try:
-        with open(yaml_path, "r", encoding="utf-8") as colorscheme_file:
-            return yaml.load(colorscheme_file)
+        with open(yaml_path, "r", encoding="utf-8") as yaml_file:
+            return yaml.load(yaml_file)
     except OSError as exc:
         msg = f"Could not open YAML colorscheme file at {yaml_path=}."
         raise RuntimeError(msg) from exc
@@ -44,7 +44,7 @@ def convert_yaml_colorscheme_to_toml_at(
     if toml_out_path is None:
         toml_out_path = yaml_path.replace(".yml", ".toml").replace(".yaml", ".toml")
 
-    original_yaml = load_yaml_colorscheme_from(yaml_path)
+    original_yaml = load_yaml_file_from(yaml_path)
     toml_equivalent = create_equivalent_toml_to_yaml(original_yaml)
 
     with open(toml_out_path, "w+", encoding="utf=8") as toml_file:

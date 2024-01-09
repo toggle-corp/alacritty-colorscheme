@@ -1,5 +1,6 @@
 from alacritty_colorscheme import __version__
 from alacritty_colorscheme.cli import handle_args, create_parser
+from alacritty_colorscheme.yml_to_toml import load_yaml_file_from
 from shutil import copytree, rmtree
 from pytest import raises, fixture
 from os import path
@@ -111,3 +112,32 @@ def test_toggle_in_list(test_config_path):
         'base16-zenburn.yml',
     ])
     handle_args(args)
+
+
+def test_apply_colorscheme_to_yml_config_with_default_arg(test_config_path):
+    """Checks that the user can just specify a colorscheme without a config
+    file, and the correct config file will automatically be chosen."""
+
+    # Import the CLI module locally so we can poke around with it.
+    import alacritty_colorscheme.cli as cli
+
+    # Override defaults temporarily for test
+    cli.DEFAULT_CONFIG_PATH_OPTIONS = [
+        # TOML option which doesn't exist, should be skipped:
+        path.join(test_config_path, "alacritty-without-color.toml"),
+        # YAML option which should be taken as default:
+        path.join(test_config_path, "alacritty-without-color.yml"),
+    ]
+    cli.DEFAULT_COLORSCHEME_DIR = path.join(test_config_path, "colors")
+    cli.ArgumentParser.colorscheme_dir = cli.DEFAULT_COLORSCHEME_DIR
+
+    parser = cli.create_parser()
+    args = parser.parse_args(["apply", "base16-ocean.yml"])
+
+    # Execute the command
+    cli.handle_args(args)
+
+    # Check that the correct changes were made
+    conf = load_yaml_file_from(path.join(test_config_path, "alacritty-without-color.yml"))
+
+    assert conf["colors"]["primary"]["background"] == "0x2b303b"
